@@ -108,7 +108,8 @@ void Database::DatabaseOpenTask::doPerformTask()
     m_success = database()->performOpenAndVerify(m_setVersionInNewDatabase, m_code);
 }
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
 const char* Database::DatabaseOpenTask::debugTaskName() const
 {
     return "DatabaseOpenTask";
@@ -128,7 +129,8 @@ void Database::DatabaseCloseTask::doPerformTask()
     database()->close();
 }
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
 const char* Database::DatabaseCloseTask::debugTaskName() const
 {
     return "DatabaseCloseTask";
@@ -150,7 +152,8 @@ void Database::DatabaseTransactionTask::doPerformTask()
         m_transaction->database()->inProgressTransactionCompleted();
 }
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
 const char* Database::DatabaseTransactionTask::debugTaskName() const
 {
     return "DatabaseTransactionTask";
@@ -172,7 +175,8 @@ void Database::DatabaseTableNamesTask::doPerformTask()
     m_tableNames = database()->performGetTableNames();
 }
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
 const char* Database::DatabaseTableNamesTask::debugTaskName() const
 {
     return "DatabaseTableNamesTask";

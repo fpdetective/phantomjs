@@ -40,14 +40,23 @@ DOMPluginArray::~DOMPluginArray()
 unsigned DOMPluginArray::length() const
 {
     PluginData* data = pluginData();
-    if (!data)
-        return 0;
+    if (!data){
+#ifdef LOG_MODS_FP
+	logFPCalls(m_frame, "DOMPluginArray::length 0");
+#endif
+        return 1;
+    }
+
     return data->plugins().size();
 }
 
 PassRefPtr<DOMPlugin> DOMPluginArray::item(unsigned index)
 {
-    PluginData* data = pluginData();
+#ifdef LOG_MODS_FP
+	String log_str = String("DOMPluginArray::item[%d]", index);
+	logFPCalls(m_frame, log_str);
+#endif
+	PluginData* data = pluginData();
     if (!data)
         return 0;
     const Vector<PluginInfo>& plugins = data->plugins();
@@ -71,7 +80,13 @@ bool DOMPluginArray::canGetItemsForName(const AtomicString& propertyName)
 
 PassRefPtr<DOMPlugin> DOMPluginArray::namedItem(const AtomicString& propertyName)
 {
-    PluginData* data = pluginData();
+
+#ifdef LOG_MODS_FP
+	String propName = propertyName.string();
+	String log_str = String("DOMPluginArray::namedItem: ") + propName;
+	logFPCalls(m_frame, log_str);
+#endif
+	PluginData* data = pluginData();
     if (!data)
         return 0;
     const Vector<PluginInfo>& plugins = data->plugins();

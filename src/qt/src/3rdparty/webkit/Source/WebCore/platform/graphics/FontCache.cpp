@@ -41,6 +41,16 @@
 
 using namespace WTF;
 
+
+#ifdef LOG_MODS_FP
+#include <stdio.h> //!!! gunes: to enable printf
+#include <wtf/text/WTFString.h>
+#endif
+
+#ifdef LOG_MODS_FP
+#include "Frame.h"
+#endif
+
 namespace WebCore {
 
 FontCache* fontCache()
@@ -255,6 +265,13 @@ static ListHashSet<const SimpleFontData*>* gInactiveFontData = 0;
 
 SimpleFontData* FontCache::getCachedFontData(const FontDescription& fontDescription, const AtomicString& family, bool checkingAlternateName)
 {
+
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    String famName = family;
+    String log_str = String("FontCache::getCachedFontData ") + famName;
+    logFPCalls(0, log_str, "");
+#endif
+
     FontPlatformData* platformData = getCachedFontPlatformData(fontDescription, family, checkingAlternateName);
     if (!platformData)
         return 0;

@@ -123,6 +123,11 @@ public:
     static const AtomicString& xmlnsAtom2();
 #endif
 
+//#define LOG_MODS_FP 1
+#ifdef LOG_MODS_FP //!!! gunes, otherwise it's a pain to print AtomicStrings when WTFstring is not included...
+     void show() const; //http://trac.webkit.org/browser/trunk/Source/JavaScriptCore/wtf/text/AtomicString.cpp?rev=87438
+#endif
+
 private:
     String m_string;
     

@@ -347,6 +347,10 @@ public:
     String(WTF::HashTableDeletedValueType) : m_impl(WTF::HashTableDeletedValue) { }
     bool isHashTableDeletedValue() const { return m_impl.isHashTableDeletedValue(); }
 
+#ifdef LOG_MODS_FP
+    void show() const;
+#endif
+
 private:
     RefPtr<StringImpl> m_impl;
 };

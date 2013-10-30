@@ -42,26 +42,46 @@ DOMPlugin::~DOMPlugin()
 
 String DOMPlugin::name() const
 {
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMPlugin::name") + pluginInfo().name;
+    logFPCalls(m_frame, log_str);
+#endif
     return pluginInfo().name;
 }
 
 String DOMPlugin::filename() const
 {
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMPlugin::filename") + pluginInfo().file;
+    logFPCalls(m_frame, log_str);
+#endif
     return pluginInfo().file;
 }
 
 String DOMPlugin::description() const
 {
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMPlugin::description") + pluginInfo().desc;
+    logFPCalls(m_frame, log_str);
+#endif
     return pluginInfo().desc;
 }
 
 unsigned DOMPlugin::length() const
 {
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMPlugin::length") + String("%d", pluginInfo().mimes.size());
+    logFPCalls(m_frame, log_str);
+#endif
     return pluginInfo().mimes.size();
 }
 
 PassRefPtr<DOMMimeType> DOMPlugin::item(unsigned index)
 {
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMPlugin::item w/ index: ") + String("%d", index);
+    logFPCalls(m_frame, log_str);
+#endif
     if (index >= pluginInfo().mimes.size())
         return 0;
 

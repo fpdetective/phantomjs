@@ -105,7 +105,8 @@ private:
     void deliverTransactionErrorCallback();
     void cleanupAfterTransactionErrorCallback();
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
     static const char* debugStepName(TransactionStepMethod);
 #endif
 

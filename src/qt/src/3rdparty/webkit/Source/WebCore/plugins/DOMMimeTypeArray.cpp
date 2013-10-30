@@ -39,14 +39,27 @@ DOMMimeTypeArray::~DOMMimeTypeArray()
 
 unsigned DOMMimeTypeArray::length() const
 {
+
     PluginData* data = getPluginData();
-    if (!data)
+    if (!data){
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "DOMMimeTypeArray::length 0");
+#endif
         return 0;
+    }
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, String("DOMMimeTypeArray::length %d", data->mimes().size()));
+#endif
+
     return data->mimes().size();
 }
 
 PassRefPtr<DOMMimeType> DOMMimeTypeArray::item(unsigned index)
 {
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMMimeTypeArray::item[%d]", index);
+    logFPCalls(m_frame, log_str);
+#endif
     PluginData* data = getPluginData();
     if (!data)
         return 0;
@@ -71,6 +84,11 @@ bool DOMMimeTypeArray::canGetItemsForName(const AtomicString& propertyName)
 
 PassRefPtr<DOMMimeType> DOMMimeTypeArray::namedItem(const AtomicString& propertyName)
 {
+#ifdef LOG_MODS_FP
+    String propName = propertyName;
+    String log_str = String("DOMMimeTypeArray::namedItem: ") + propName;
+    logFPCalls(m_frame, log_str);
+#endif
     PluginData *data = getPluginData();
     if (!data)
         return 0;

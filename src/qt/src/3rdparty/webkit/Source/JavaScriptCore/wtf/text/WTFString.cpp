@@ -973,11 +973,18 @@ float charactersToFloat(const UChar* data, size_t length, bool* ok, bool* didRea
 
 } // namespace WTF
 
-#ifndef NDEBUG
+
+//#ifndef NDEBUG - !!! gunes: we want to log from release version
+#ifdef LOG_MODS_FP
 // For use in the debugger
 String* string(const char*);
 Vector<char> asciiDebug(StringImpl* impl);
 Vector<char> asciiDebug(String& string);
+
+void String::show() const
+{
+    printf("%s\n", asciiDebug(impl()).data());
+}
 
 String* string(const char* s)
 {
@@ -1008,5 +1015,6 @@ Vector<char> asciiDebug(String& string)
 {
     return asciiDebug(string.impl());
 }
+
 
 #endif

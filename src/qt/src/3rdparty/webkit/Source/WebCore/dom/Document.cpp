@@ -688,6 +688,11 @@ DOMImplementation* Document::implementation()
 {
     if (!m_implementation)
         m_implementation = DOMImplementation::create(this);
+
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "Document::implementation");
+#endif
+
     return m_implementation.get();
 }
 

@@ -115,6 +115,28 @@ using namespace std;
 
 namespace WebCore {
 
+#ifdef LOG_MODS_FP
+void logFPCalls(Frame* p_frame, String log_str, String url){
+	if (!url && p_frame)
+		url = getUrls(p_frame);
+	printf(">>>FPLOG %s %s\n", log_str.utf8().data(), url.utf8().data());
+}
+
+String getUrls(Frame* p_frame){
+	if (!p_frame || !p_frame->page() || !p_frame->document())
+		return String();
+
+	String doc_url = p_frame->document()->url();
+	const String* js_url = p_frame->script()->sourceURL();
+	String url;
+	if(!js_url)
+		url = doc_url;
+	else
+		url = " onURL: " + doc_url + " onJSURL: " + *js_url;
+	return url;
+}
+#endif
+
 using namespace HTMLNames;
 
 #ifndef NDEBUG

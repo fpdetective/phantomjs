@@ -65,6 +65,10 @@
 #endif // ifndef WEBCORE_NAVIGATOR_VENDOR_SUB
 
 
+#ifdef LOG_MODS_FP
+#include <stdio.h> //!!! gunes: to enable printf. We cannot access frame.cpp from here
+#endif
+
 namespace WebCore {
 
 NavigatorBase::~NavigatorBase()
@@ -73,6 +77,9 @@ NavigatorBase::~NavigatorBase()
 
 String NavigatorBase::appName() const
 {
+#ifdef LOG_MODS_FP
+    printf(">>>FPLOG NavigatorBase::appName Netscape\n");
+#endif
     return "Netscape";
 }
 
@@ -80,11 +87,22 @@ String NavigatorBase::appVersion() const
 {
     // Version is everything in the user agent string past the "Mozilla/" prefix.
     const String& agent = userAgent();
+
+#ifdef LOG_MODS_FP
+    //const String& log_str = String("NavigatorBase::appVersion ") + agent.substring(agent.find('/') + 1);
+    printf(">>>FPLOG NavigatorBase::appVersion\n");
+#endif
+
     return agent.substring(agent.find('/') + 1);
 }
 
 String NavigatorBase::platform() const
 {
+
+#ifdef LOG_MODS_FP
+    printf(">>>FPLOG NavigatorBase::platform %s\n", WEBCORE_NAVIGATOR_PLATFORM);
+#endif
+
 #if OS(LINUX)
     if (String("") != WEBCORE_NAVIGATOR_PLATFORM)
         return WEBCORE_NAVIGATOR_PLATFORM;
@@ -98,31 +116,53 @@ String NavigatorBase::platform() const
 
 String NavigatorBase::appCodeName() const
 {
+#ifdef LOG_MODS_FP
+    printf(">>>FPLOG NavigatorBase::appCodeName Mozilla\n");
+#endif
     return "Mozilla";
 }
 
 String NavigatorBase::product() const
 {
+#ifdef LOG_MODS_FP
+    printf(">>>FPLOG NavigatorBase::product %s\n", WEBCORE_NAVIGATOR_PRODUCT);
+#endif
+
     return WEBCORE_NAVIGATOR_PRODUCT;
 }
 
 String NavigatorBase::productSub() const
 {
+#ifdef LOG_MODS_FP
+    printf(">>>FPLOG NavigatorBase::productSub %s\n", WEBCORE_NAVIGATOR_PRODUCT_SUB);
+#endif
+
     return WEBCORE_NAVIGATOR_PRODUCT_SUB;
 }
 
 String NavigatorBase::vendor() const
 {
+#ifdef LOG_MODS_FP
+    printf(">>>FPLOG NavigatorBase::vendor %s\n", WEBCORE_NAVIGATOR_VENDOR);
+#endif
+
     return WEBCORE_NAVIGATOR_VENDOR;
 }
 
 String NavigatorBase::vendorSub() const
 {
+#ifdef LOG_MODS_FP
+    printf(">>>FPLOG NavigatorBase::vendorSub %s\n", WEBCORE_NAVIGATOR_VENDOR_SUB);
+#endif
+
     return WEBCORE_NAVIGATOR_VENDOR_SUB;
 }
 
 bool NavigatorBase::onLine() const
 {
+#ifdef LOG_MODS_FP
+    printf(">>>FPLOG NavigatorBase::onLine\n");
+#endif
     return networkStateNotifier().onLine();
 }
 

@@ -29,6 +29,8 @@
 
 #include <wtf/Platform.h>
 
+#define LOG_MODS_FP 1 // !!! gunes to enable logging, TODO remove redundant defines
+
 /* See note in wtf/Platform.h for more info on EXPORT_MACROS. */
 #if USE(EXPORT_MACROS)
 

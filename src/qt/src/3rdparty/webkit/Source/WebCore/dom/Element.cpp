@@ -380,6 +380,15 @@ int Element::offsetTop()
 
 int Element::offsetWidth()
 {
+
+#ifdef LOG_MODS_FP
+    if(document()->frame() && document()->frame()->script() && document()->frame()->script()->sourceURL()){
+        logFPCalls(document()->frame(), "Element::offsetWidth");
+    }else{
+        logFPCalls(0, "Element::offsetWidth", document()->url());
+    }
+
+#endif
     document()->updateLayoutIgnorePendingStylesheets();
     if (RenderBoxModelObject* rend = renderBoxModelObject())
         return adjustForAbsoluteZoom(rend->offsetWidth(), rend);
@@ -388,6 +397,14 @@ int Element::offsetWidth()
 
 int Element::offsetHeight()
 {
+#ifdef LOG_MODS_FP
+    if(document()->frame() && document()->frame()->script() && document()->frame()->script()->sourceURL()){
+        logFPCalls(document()->frame(), "Element::offsetWidth");
+    }else{
+        logFPCalls(0, "Element::offsetHeight", document()->url());
+    }
+#endif
+
     document()->updateLayoutIgnorePendingStylesheets();
     if (RenderBoxModelObject* rend = renderBoxModelObject())
         return adjustForAbsoluteZoom(rend->offsetHeight(), rend);
@@ -579,6 +596,10 @@ PassRefPtr<ClientRectList> Element::getClientRects() const
 PassRefPtr<ClientRect> Element::getBoundingClientRect() const
 {
     document()->updateLayoutIgnorePendingStylesheets();
+
+#ifdef LOG_MODS_FP
+    logFPCalls(NULL, "Element::getBoundingClientRect", document()->url());
+#endif
 
     Vector<FloatQuad> quads;
 #if ENABLE(SVG)

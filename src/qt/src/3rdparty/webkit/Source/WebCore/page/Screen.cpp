@@ -57,6 +57,9 @@ unsigned Screen::height() const
 {
     if (!m_frame)
         return 0;
+#ifdef LOG_MODS_FP
+	logFPCalls(m_frame, "Screen::height");
+#endif
     return static_cast<unsigned>(screenRect(m_frame->view()).height());
 }
 
@@ -64,6 +67,10 @@ unsigned Screen::width() const
 {
     if (!m_frame)
         return 0;
+#ifdef LOG_MODS_FP
+	logFPCalls(m_frame, "Screen::width");
+#endif
+
     return static_cast<unsigned>(screenRect(m_frame->view()).width());
 }
 
@@ -71,6 +78,9 @@ unsigned Screen::colorDepth() const
 {
     if (!m_frame)
         return 0;
+#ifdef LOG_MODS_FP
+	logFPCalls(m_frame, "Screen::colorDepth");
+#endif
     return static_cast<unsigned>(screenDepth(m_frame->view()));
 }
 
@@ -78,6 +88,11 @@ unsigned Screen::pixelDepth() const
 {
     if (!m_frame)
         return 0;
+
+#ifdef LOG_MODS_FP
+	logFPCalls(m_frame, "Screen::pixelDepth");
+#endif
+
     return static_cast<unsigned>(screenDepth(m_frame->view()));
 }
 
@@ -85,6 +100,11 @@ int Screen::availLeft() const
 {
     if (!m_frame)
         return 0;
+
+#ifdef LOG_MODS_FP
+	logFPCalls(m_frame, "Screen::availLeft");
+#endif
+
     return static_cast<int>(screenAvailableRect(m_frame->view()).x());
 }
 
@@ -92,6 +112,11 @@ int Screen::availTop() const
 {
     if (!m_frame)
         return 0;
+
+#ifdef LOG_MODS_FP
+	logFPCalls(m_frame, "Screen::availTop");
+#endif
+
     return static_cast<int>(screenAvailableRect(m_frame->view()).y());
 }
 
@@ -99,6 +124,11 @@ unsigned Screen::availHeight() const
 {
     if (!m_frame)
         return 0;
+
+#ifdef LOG_MODS_FP
+	logFPCalls(m_frame, "Screen::availHeight");
+#endif
+
     return static_cast<unsigned>(screenAvailableRect(m_frame->view()).height());
 }
 
@@ -106,6 +136,11 @@ unsigned Screen::availWidth() const
 {
     if (!m_frame)
         return 0;
+
+#ifdef LOG_MODS_FP
+	logFPCalls(m_frame, "Screen::availWidth");
+#endif
+
     return static_cast<unsigned>(screenAvailableRect(m_frame->view()).width());
 }
 

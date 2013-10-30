@@ -72,7 +72,8 @@ static const int updateTimerDelay = 5;
 
 static bool checkIntegrityOnOpen = false;
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
 static String urlForLogging(const String& url)
 {
     static unsigned urlTruncationLength = 120;
@@ -968,7 +969,8 @@ void* IconDatabase::iconDatabaseSyncThread()
     
     LOG(IconDatabase, "(THREAD) IconDatabase sync thread started");
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
     double startTime = currentTime();
 #endif
 
@@ -994,7 +996,8 @@ void* IconDatabase::iconDatabaseSyncThread()
     if (shouldStopThreadActivity())
         return syncThreadMainLoop();
         
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
     double timeStamp = currentTime();
     LOG(IconDatabase, "(THREAD) Open took %.4f seconds", timeStamp - startTime);
 #endif    
@@ -1003,7 +1006,8 @@ void* IconDatabase::iconDatabaseSyncThread()
     if (shouldStopThreadActivity())
         return syncThreadMainLoop();
         
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
     double newStamp = currentTime();
     LOG(IconDatabase, "(THREAD) performOpenInitialization() took %.4f seconds, now %.4f seconds from thread start", newStamp - timeStamp, newStamp - startTime);
     timeStamp = newStamp;
@@ -1026,7 +1030,8 @@ void* IconDatabase::iconDatabaseSyncThread()
         if (shouldStopThreadActivity())
             return syncThreadMainLoop();
             
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
         newStamp = currentTime();
         LOG(IconDatabase, "(THREAD) performImport() took %.4f seconds, now %.4f seconds from thread start", newStamp - timeStamp, newStamp - startTime);
         timeStamp = newStamp;
@@ -1043,7 +1048,8 @@ void* IconDatabase::iconDatabaseSyncThread()
     if (shouldStopThreadActivity())
         return syncThreadMainLoop();
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
     newStamp = currentTime();
     LOG(IconDatabase, "(THREAD) performURLImport() took %.4f seconds.  Entering main loop %.4f seconds from thread start", newStamp - timeStamp, newStamp - startTime);
 #endif 
@@ -1359,7 +1365,8 @@ void* IconDatabase::syncThreadMainLoop()
     while (!m_threadTerminationRequested) {
         m_syncLock.unlock();
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
         double timeStamp = currentTime();
 #endif
         LOG(IconDatabase, "(THREAD) Main work loop starting");
@@ -1392,7 +1399,8 @@ void* IconDatabase::syncThreadMainLoop()
             // has asked to delay pruning
             static bool prunedUnretainedIcons = false;
             if (didWrite && !m_privateBrowsingEnabled && !prunedUnretainedIcons && !databaseCleanupCounter) {
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
                 double time = currentTime();
 #endif
                 LOG(IconDatabase, "(THREAD) Starting pruneUnretainedIcons()");
@@ -1411,7 +1419,8 @@ void* IconDatabase::syncThreadMainLoop()
                 break;
         }
         
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
         double newstamp = currentTime();
         LOG(IconDatabase, "(THREAD) Main work loop ran for %.4f seconds, %s requested to terminate", newstamp - timeStamp, shouldStopThreadActivity() ? "was" : "was not");
 #endif
@@ -1459,7 +1468,8 @@ bool IconDatabase::readFromDatabase()
 {
     ASSERT_ICON_SYNC_THREAD();
     
-#ifndef NDEBUG
+////#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
     double timeStamp = currentTime();
 #endif
 
@@ -1568,7 +1578,8 @@ bool IconDatabase::writeToDatabase()
 {
     ASSERT_ICON_SYNC_THREAD();
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
     double timeStamp = currentTime();
 #endif
 
@@ -1716,7 +1727,8 @@ void IconDatabase::checkForDanglingPageURLs(bool pruneIfFound)
     // This check can be relatively expensive so we don't do it in a release build unless the caller has asked us to prune any dangling
     // entries.  We also don't want to keep performing this check and reporting this error if it has already found danglers before so we
     // keep track of whether we've found any.  We skip the check in the release build pretending to have already found danglers already.
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
     static bool danglersFound = true;
 #else
     static bool danglersFound = false;
@@ -1773,7 +1785,8 @@ void* IconDatabase::cleanupSyncThread()
 {
     ASSERT_ICON_SYNC_THREAD();
     
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
     double timeStamp = currentTime();
 #endif 
 
@@ -1793,7 +1806,8 @@ void* IconDatabase::cleanupSyncThread()
     deleteAllPreparedStatements();    
     m_syncDB.close();
     
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
     LOG(IconDatabase, "(THREAD) Final closure took %.4f seconds", currentTime() - timeStamp);
 #endif
     
