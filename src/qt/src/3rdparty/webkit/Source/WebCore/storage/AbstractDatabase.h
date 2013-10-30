@@ -36,7 +36,8 @@
 #include "SQLiteDatabase.h"
 #include <wtf/Forward.h>
 #include <wtf/ThreadSafeRefCounted.h>
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED // !!! gunes: to fix build error https://bugs.webkit.org/attachment.cgi?id=98528&action=diff http://mac-os-forge.2317878.n4.nabble.com/Inconsistency-in-logging-approach-td167026.html
 #include "SecurityOrigin.h"
 #endif
 
@@ -109,7 +110,8 @@ protected:
     unsigned long m_estimatedSize;
     String m_filename;
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED // !!! see other note above
     String databaseDebugName() const { return m_contextThreadSecurityOrigin->toString() + "::" + m_name; }
 #endif
 

@@ -61,6 +61,11 @@ typedef struct HBITMAP__* HBITMAP;
 
 namespace WebCore {
 
+#ifdef LOG_MODS_FP
+	String getUrls(Frame* p_frame);
+	void logFPCalls(Frame* p_frame, String log_str, String url="");
+#endif
+
     class Document;
     class FrameView;
     class HTMLTableCellElement;

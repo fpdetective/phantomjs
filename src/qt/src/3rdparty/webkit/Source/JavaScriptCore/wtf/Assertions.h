@@ -117,6 +117,8 @@
 #endif
 #endif
 
+#define LOG_DISABLED 0 // !!! to enable logging in release version
+
 #if COMPILER(GCC)
 #define WTF_PRETTY_FUNCTION __PRETTY_FUNCTION__
 #else

@@ -365,4 +365,10 @@ AtomicString AtomicString::fromUTF8Internal(const char* charactersStart, const c
     return atomicString;
 }
 
+#ifdef LOG_MODS_FP //!!! to enable log output
+void AtomicString::show() const //http://trac.webkit.org/browser/trunk/Source/JavaScriptCore/wtf/text/AtomicString.cpp?rev=87438
+{
+    m_string.show();
+}
+#endif
 } // namespace WTF

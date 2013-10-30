@@ -44,6 +44,10 @@
 #include "SVGURIReference.h"
 #endif
 
+#ifdef LOG_MODS_FP
+#include "Frame.h"
+#endif
+
 namespace WebCore {
 
 CSSFontFaceSource::CSSFontFaceSource(const String& str, CachedFont* font)
@@ -103,10 +107,22 @@ SimpleFontData* CSSFontFaceSource::getFontData(const FontDescription& fontDescri
     if (!isValid())
         return 0;
 
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    String famName = m_string;
+    String log_str = String("CSSFontFaceSource::getFontData ") + famName;
+    logFPCalls(0, log_str, "");
+#endif
+
 #if ENABLE(SVG_FONTS)
     if (!m_font && !m_svgFontFaceElement) {
 #else
     if (!m_font) {
+#endif
+
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    String famName = m_string;
+    String log_str = String("CSSFontFaceSource::getFontData ") + famName;
+    logFPCalls(0, log_str, "UNKNOWN");
 #endif
         SimpleFontData* fontData = fontCache()->getCachedFontData(fontDescription, m_string);
 
@@ -178,6 +194,12 @@ SimpleFontData* CSSFontFaceSource::getFontData(const FontDescription& fontDescri
         if (CachedResourceLoader* cachedResourceLoader = fontSelector->cachedResourceLoader())
             m_font->beginLoadIfNeeded(cachedResourceLoader);
         // FIXME: m_string is a URL so it makes no sense to pass it as a family name.
+
+        #ifdef LOG_MODS_FP_SUPERVERBOSE
+            String famName = m_string;
+            String log_str = String("2 CSSFontFaceSource::getFontData ") + famName;
+            logFPCalls(0, log_str);
+        #endif
         SimpleFontData* tempData = fontCache()->getCachedFontData(fontDescription, m_string);
         if (!tempData)
             tempData = fontCache()->getLastResortFallbackFont(fontDescription);

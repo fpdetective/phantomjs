@@ -109,6 +109,11 @@ String Navigator::appVersion() const
 
 String Navigator::language() const
 {
+#ifdef LOG_MODS_FP
+    String log_str = String("Navigator::language ") + String(defaultLanguage().utf8().data());
+    logFPCalls(m_frame, log_str);
+#endif
+
     return defaultLanguage();
 }
 
@@ -122,11 +127,27 @@ String Navigator::userAgent() const
     if (!m_frame->page())
         return String();
         
+#ifdef LOG_MODS_FP
+    String log_str = String("Navigator::userAgent ") + m_frame->loader()->userAgent(m_frame->document()->url());
+    logFPCalls(m_frame, log_str);
+#endif/*
+    #ifdef LOG_MODS_FP
+
+    String userAgent = m_frame->loader()->userAgent(m_frame->document()->url());
+    String url = getUrls(m_frame);
+    printf(">>>Call Navigator::userAgent: %s onURL: %s\n", userAgent.utf8().data(), url.utf8().data());
+#endif*/
+
     return m_frame->loader()->userAgent(m_frame->document()->url());
 }
 
 DOMPluginArray* Navigator::plugins() const
 {
+#ifdef LOG_MODS_FP
+    String log_str = "Navigator::plugins ---";
+    logFPCalls(m_frame, log_str);
+#endif
+
     if (!m_plugins)
         m_plugins = DOMPluginArray::create(m_frame);
     return m_plugins.get();
@@ -134,6 +155,9 @@ DOMPluginArray* Navigator::plugins() const
 
 DOMMimeTypeArray* Navigator::mimeTypes() const
 {
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "Navigator::mimeTypes ---");
+#endif
     if (!m_mimeTypes)
         m_mimeTypes = DOMMimeTypeArray::create(m_frame);
     return m_mimeTypes.get();
@@ -144,8 +168,18 @@ bool Navigator::cookieEnabled() const
     if (!m_frame)
         return false;
         
-    if (m_frame->page() && !m_frame->page()->cookieEnabled())
+    if (m_frame->page() && !m_frame->page()->cookieEnabled()){
+
+        #ifdef LOG_MODS_FP
+            logFPCalls(m_frame, "Navigator::cookieEnabled False");
+        #endif
+
         return false;
+    }
+
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "Navigator::cookieEnabled");
+#endif
 
     return cookiesEnabled(m_frame->document());
 }
@@ -154,6 +188,9 @@ bool Navigator::javaEnabled() const
 {
     if (!m_frame || !m_frame->settings())
         return false;
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "Navigator::javaEnabled");
+#endif
 
     return m_frame->settings()->isJavaEnabled();
 }
@@ -162,6 +199,11 @@ Geolocation* Navigator::geolocation() const
 {
     if (!m_geolocation)
         m_geolocation = Geolocation::create(m_frame);
+
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "Navigator::geolocation");
+#endif
+
     return m_geolocation.get();
 }
 
@@ -175,6 +217,10 @@ void Navigator::getStorageUpdates()
     if (!page)
         return;
 
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "Navigator::getStorageUpdates");
+#endif
+
     StorageNamespace* localStorage = page->group().localStorage();
     if (localStorage)
         localStorage->unlock();
@@ -186,6 +232,7 @@ static bool verifyCustomHandlerURL(const String& baseURL, const String& url, Exc
 {
     // The specification requires that it is a SYNTAX_ERR if the "%s" token is
     // not present.
+
     static const char token[] = "%s";
     int index = url.find(token);
     if (-1 == index) {
@@ -221,6 +268,12 @@ static bool verifyProtocolHandlerScheme(const String& scheme, ExceptionCode& ec)
 
 void Navigator::registerProtocolHandler(const String& scheme, const String& url, const String& title, ExceptionCode& ec)
 {
+
+#ifdef LOG_MODS_FP
+    String log_str = "Navigator::registerProtocolHandler scheme: " + scheme + "url: " + url + "title" + title;
+    logFPCalls(m_frame, log_str);
+#endif
+
     if (!verifyProtocolHandlerScheme(scheme, ec))
         return;
 
@@ -250,6 +303,10 @@ void Navigator::webkitGetUserMedia(const String& options,
                                    PassRefPtr<NavigatorUserMediaErrorCallback> errorCallback)
 {
     // FIXME: implement a call to the media stream context when available.
+#ifdef LOG_MODS_FP
+    String log_str = "Navigator::webkitGetUserMedia options: " + options;
+    logFPCalls(m_frame, log_str);
+#endif
 }
 #endif
 

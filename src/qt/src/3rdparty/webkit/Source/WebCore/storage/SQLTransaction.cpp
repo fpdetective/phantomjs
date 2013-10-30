@@ -117,7 +117,8 @@ void SQLTransaction::enqueueStatement(PassRefPtr<SQLStatement> statement)
     m_statementQueue.append(statement);
 }
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
+#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
 const char* SQLTransaction::debugStepName(SQLTransaction::TransactionStepMethod step)
 {
     if (step == &SQLTransaction::acquireLock)

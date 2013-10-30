@@ -54,6 +54,7 @@
 #include "SVGNames.h"
 #endif
 
+
 namespace WebCore {
 
 CSSFontSelector::CSSFontSelector(Document* document)
@@ -401,8 +402,15 @@ static FontData* fontDataForGenericFamily(Document* document, const FontDescript
     else if (familyName == "-webkit-standard")
         genericFamily = settings->standardFontFamily();
 
-    if (!genericFamily.isEmpty())
+    if (!genericFamily.isEmpty()){
+
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    String famName = genericFamily;
+    String log_str = String("CSSFontSelector::fontDataForGenericFamily ") + famName;
+    logFPCalls(0, log_str, "UNKNOWN");
+#endif
         return fontCache()->getCachedFontData(fontDescription, genericFamily);
+    }
 
     return 0;
 }
@@ -491,6 +499,18 @@ static inline bool compareFontFaces(CSSFontFace* first, CSSFontFace* second)
 
 FontData* CSSFontSelector::getFontData(const FontDescription& fontDescription, const AtomicString& familyName)
 {
+
+#define LOG_MODS_FP 1 // !!! TODO remove redundant defines
+#ifdef LOG_MODS_FP
+    String famName = familyName;
+    String log_str = String("CSSFontSelector::getFontData ") + famName;
+    if(m_document){
+        logFPCalls(0, log_str, m_document->url());
+    }else{
+        logFPCalls(0, log_str, "");
+    }
+#endif
+
     if (m_fontFaces.isEmpty()) {
         if (familyName.startsWith("-webkit-"))
             return fontDataForGenericFamily(m_document, fontDescription, familyName);

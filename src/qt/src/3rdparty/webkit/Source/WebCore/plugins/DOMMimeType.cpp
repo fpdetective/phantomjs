@@ -46,6 +46,10 @@ DOMMimeType::~DOMMimeType()
 
 const String &DOMMimeType::type() const
 {
+#ifdef LOG_MODS_FP
+	logFPCalls(m_frame, String("DOMMimeType::type"));
+#endif
+
     return mimeClassInfo().type;
 }
 
@@ -59,11 +63,19 @@ String DOMMimeType::suffixes() const
             builder.append(',');
         builder.append(extensions[i]);
     }
+
+#ifdef LOG_MODS_FP
+	logFPCalls(m_frame, String("DOMMimeType::suffixes"));
+#endif
     return builder.toString();
 }
 
 const String &DOMMimeType::description() const
 {
+#ifdef LOG_MODS_FP
+	logFPCalls(m_frame, String("DOMMimeType::description"));
+#endif
+
     return mimeClassInfo().desc;
 }
 
@@ -71,6 +83,10 @@ PassRefPtr<DOMPlugin> DOMMimeType::enabledPlugin() const
 {
     if (!m_frame || !m_frame->page() || !m_frame->page()->mainFrame()->loader()->subframeLoader()->allowPlugins(NotAboutToInstantiatePlugin))
         return 0;
+
+#ifdef LOG_MODS_FP
+	logFPCalls(m_frame, String("DOMMimeType::enabledPlugin"));
+#endif
 
     return DOMPlugin::create(m_pluginData.get(), m_frame, m_pluginData->mimePluginIndices()[m_index]);
 }

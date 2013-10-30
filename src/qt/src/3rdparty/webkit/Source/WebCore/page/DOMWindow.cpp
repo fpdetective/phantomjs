@@ -523,6 +523,10 @@ int DOMWindow::orientation() const
 {
     if (!m_frame)
         return 0;
+
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "DOMWindow::orientation");
+#endif
     
     return m_frame->orientation();
 }
@@ -532,6 +536,11 @@ Screen* DOMWindow::screen() const
 {
     if (!m_screen)
         m_screen = Screen::create(m_frame);
+
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "DOMWindow::screen");
+#endif
+
     return m_screen.get();
 }
 
@@ -539,6 +548,11 @@ History* DOMWindow::history() const
 {
     if (!m_history)
         m_history = History::create(m_frame);
+
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    logFPCalls(m_frame, "DOMWindow::history");
+#endif
+
     return m_history.get();
 }
 
@@ -546,6 +560,11 @@ Crypto* DOMWindow::crypto() const
 {
     if (!m_crypto)
         m_crypto = Crypto::create();
+
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    logFPCalls(m_frame, "DOMWindow::crypto");
+#endif
+
     return m_crypto.get();
 }
 
@@ -553,6 +572,12 @@ BarInfo* DOMWindow::locationbar() const
 {
     if (!m_locationbar)
         m_locationbar = BarInfo::create(m_frame, BarInfo::Locationbar);
+
+
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    logFPCalls(m_frame, "DOMWindow::locationbar");
+#endif
+
     return m_locationbar.get();
 }
 
@@ -560,6 +585,10 @@ BarInfo* DOMWindow::menubar() const
 {
     if (!m_menubar)
         m_menubar = BarInfo::create(m_frame, BarInfo::Menubar);
+
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    logFPCalls(m_frame, "DOMWindow::menubar");
+#endif
     return m_menubar.get();
 }
 
@@ -567,6 +596,10 @@ BarInfo* DOMWindow::personalbar() const
 {
     if (!m_personalbar)
         m_personalbar = BarInfo::create(m_frame, BarInfo::Personalbar);
+
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    logFPCalls(m_frame, "DOMWindow::personalbar");
+#endif
     return m_personalbar.get();
 }
 
@@ -574,6 +607,10 @@ BarInfo* DOMWindow::scrollbars() const
 {
     if (!m_scrollbars)
         m_scrollbars = BarInfo::create(m_frame, BarInfo::Scrollbars);
+
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    logFPCalls(m_frame, "DOMWindow::scrollbars");
+#endif
     return m_scrollbars.get();
 }
 
@@ -581,6 +618,11 @@ BarInfo* DOMWindow::statusbar() const
 {
     if (!m_statusbar)
         m_statusbar = BarInfo::create(m_frame, BarInfo::Statusbar);
+
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    logFPCalls(m_frame, "DOMWindow::statusbar");
+#endif
+
     return m_statusbar.get();
 }
 
@@ -588,6 +630,11 @@ BarInfo* DOMWindow::toolbar() const
 {
     if (!m_toolbar)
         m_toolbar = BarInfo::create(m_frame, BarInfo::Toolbar);
+
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    logFPCalls(m_frame, "DOMWindow::toolbar");
+#endif
+
     return m_toolbar.get();
 }
 
@@ -595,6 +642,10 @@ Console* DOMWindow::console() const
 {
     if (!m_console)
         m_console = Console::create(m_frame);
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    logFPCalls(m_frame, "DOMWindow::console");
+#endif
+
     return m_console.get();
 }
 
@@ -622,6 +673,7 @@ Performance* DOMWindow::performance() const
     return m_performance.get();
 }
 #endif
+
 
 Location* DOMWindow::location() const
 {
@@ -688,6 +740,9 @@ Storage* DOMWindow::localStorage(ExceptionCode& ec) const
 #if ENABLE(NOTIFICATIONS)
 NotificationCenter* DOMWindow::webkitNotifications() const
 {
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "DOMWindow::webkitNotifications");
+#endif
     if (m_notifications)
         return m_notifications.get();
 
@@ -728,6 +783,9 @@ void DOMWindow::resetGeolocation()
 #if ENABLE(INDEXED_DATABASE)
 IDBFactory* DOMWindow::webkitIndexedDB() const
 {
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "DOMWindow::webkitIndexedDB");
+#endif
     if (m_idbFactory)
         return m_idbFactory.get();
 
@@ -743,6 +801,7 @@ IDBFactory* DOMWindow::webkitIndexedDB() const
 
     // FIXME: See if indexedDatabase access is allowed.
 
+
     m_idbFactory = IDBFactory::create(page->group().idbFactory());
     return m_idbFactory.get();
 }
@@ -751,6 +810,10 @@ IDBFactory* DOMWindow::webkitIndexedDB() const
 #if ENABLE(FILE_SYSTEM)
 void DOMWindow::webkitRequestFileSystem(int type, long long size, PassRefPtr<FileSystemCallback> successCallback, PassRefPtr<ErrorCallback> errorCallback)
 {
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "DOMWindow::webkitRequestFileSystem");
+#endif
+
     Document* document = this->document();
     if (!document)
         return;
@@ -771,6 +834,9 @@ void DOMWindow::webkitRequestFileSystem(int type, long long size, PassRefPtr<Fil
 
 void DOMWindow::webkitResolveLocalFileSystemURL(const String& url, PassRefPtr<EntryCallback> successCallback, PassRefPtr<ErrorCallback> errorCallback)
 {
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "DOMWindow::webkitRequestFileSystem");
+#endif
     Document* document = this->document();
     if (!document)
         return;
@@ -971,6 +1037,10 @@ void DOMWindow::stop()
 
 void DOMWindow::alert(const String& message)
 {
+#ifdef LOG_MODS_FP
+    String log_msg = "DOMWindow::alert " + message;
+    logFPCalls(m_frame, log_msg );
+#endif
     if (!m_frame)
         return;
 
@@ -985,6 +1055,10 @@ void DOMWindow::alert(const String& message)
 
 bool DOMWindow::confirm(const String& message)
 {
+#ifdef LOG_MODS_FP
+    String log_msg = "DOMWindow::confirm " + message;
+    logFPCalls(m_frame, log_msg);
+#endif
     if (!m_frame)
         return false;
 
@@ -999,6 +1073,10 @@ bool DOMWindow::confirm(const String& message)
 
 String DOMWindow::prompt(const String& message, const String& defaultValue)
 {
+#ifdef LOG_MODS_FP
+    String log_str = "DOMWindow::prompt " + message;
+    logFPCalls(m_frame, log_str);
+#endif
     if (!m_frame)
         return String();
 
@@ -1058,11 +1136,15 @@ bool DOMWindow::find(const String& string, bool caseSensitive, bool backwards, b
 
 bool DOMWindow::offscreenBuffering() const
 {
+#ifdef LOG_MODS_FP
+    logFPCalls(m_frame, "DOMWindow::offscreenBuffering");
+#endif
     return true;
 }
 
 int DOMWindow::outerHeight() const
 {
+
     if (!m_frame)
         return 0;
 
@@ -1070,6 +1152,10 @@ int DOMWindow::outerHeight() const
     if (!page)
         return 0;
 
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::outerHeight");
+    logFPCalls(m_frame, log_str);
+#endif
     return static_cast<int>(page->chrome()->windowRect().height());
 }
 
@@ -1081,6 +1167,11 @@ int DOMWindow::outerWidth() const
     Page* page = m_frame->page();
     if (!page)
         return 0;
+
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::outerWidth");
+    logFPCalls(m_frame, log_str);
+#endif
 
     return static_cast<int>(page->chrome()->windowRect().width());
 }
@@ -1094,6 +1185,11 @@ int DOMWindow::innerHeight() const
     if (!view)
         return 0;
     
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::innerHeight");
+    logFPCalls(m_frame, log_str);
+#endif
+
     return static_cast<int>(view->height() / m_frame->pageZoomFactor());
 }
 
@@ -1105,6 +1201,11 @@ int DOMWindow::innerWidth() const
     FrameView* view = m_frame->view();
     if (!view)
         return 0;
+
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::innerWidth ");
+    logFPCalls(m_frame, log_str);
+#endif
 
     return static_cast<int>(view->width() / m_frame->pageZoomFactor());
 }
@@ -1118,6 +1219,11 @@ int DOMWindow::screenX() const
     if (!page)
         return 0;
 
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::screenX");
+    logFPCalls(m_frame, log_str);
+#endif
+
     return static_cast<int>(page->chrome()->windowRect().x());
 }
 
@@ -1129,6 +1235,11 @@ int DOMWindow::screenY() const
     Page* page = m_frame->page();
     if (!page)
         return 0;
+
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::screenY");
+    logFPCalls(m_frame, log_str);
+#endif
 
     return static_cast<int>(page->chrome()->windowRect().y());
 }
@@ -1171,6 +1282,11 @@ unsigned DOMWindow::length() const
     if (!m_frame)
         return 0;
 
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::length");
+    logFPCalls(m_frame, log_str);
+#endif
+
     return m_frame->tree()->childCount();
 }
 
@@ -1179,6 +1295,11 @@ String DOMWindow::name() const
     if (!m_frame)
         return String();
 
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    String log_str = String("DOMWindow::name " + m_frame->tree()->name());
+    logFPCalls(m_frame, log_str);
+#endif
+
     return m_frame->tree()->name();
 }
 
@@ -1186,6 +1307,11 @@ void DOMWindow::setName(const String& string)
 {
     if (!m_frame)
         return;
+
+#ifdef LOG_MODS_FP_SUPERVERBOSE
+    String log_str = String("DOMWindow::setName " + string);
+    logFPCalls(m_frame, log_str);
+#endif
 
     m_frame->tree()->setName(string);
 }
@@ -1336,12 +1462,22 @@ double DOMWindow::devicePixelRatio() const
     if (!page)
         return 0.0;
 
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::devicePixelRatio");
+    logFPCalls(m_frame, log_str);
+#endif
+
     return page->chrome()->scaleFactor();
 }
 
 #if ENABLE(DATABASE)
 PassRefPtr<Database> DOMWindow::openDatabase(const String& name, const String& version, const String& displayName, unsigned long estimatedSize, PassRefPtr<DatabaseCallback> creationCallback, ExceptionCode& ec)
 {
+
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::openDatabase " + name);
+    logFPCalls(m_frame, log_str);
+#endif
     RefPtr<Database> database = 0;
     if (m_frame && AbstractDatabase::isAvailable() && m_frame->document()->securityOrigin()->canAccessDatabase())
         database = Database::openDatabase(m_frame->document(), name, version, displayName, estimatedSize, creationCallback, ec);
@@ -1698,6 +1834,10 @@ String DOMWindow::crossDomainAccessErrorMessage(DOMWindow* activeWindow)
     if (activeWindowURL.isNull())
         return String();
 
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::crossDomainAccessErrorMessage " + m_url.string());
+    logFPCalls(m_frame, log_str);
+#endif
     // FIXME: This error message should contain more specifics of why the same origin check has failed.
     // Perhaps we should involve the security origin object in composing it.
     // FIXME: This message, and other console messages, have extra newlines. Should remove them.
@@ -1765,8 +1905,15 @@ Frame* DOMWindow::createWindow(const String& urlString, const AtomicString& fram
 PassRefPtr<DOMWindow> DOMWindow::open(const String& urlString, const AtomicString& frameName, const String& windowFeaturesString,
     DOMWindow* activeWindow, DOMWindow* firstWindow)
 {
+
     if (!m_frame)
         return 0;
+
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::open " + urlString);
+    logFPCalls(m_frame, log_str);
+#endif
+
     Frame* activeFrame = activeWindow->frame();
     if (!activeFrame)
         return 0;
@@ -1831,6 +1978,12 @@ PassRefPtr<DOMWindow> DOMWindow::open(const String& urlString, const AtomicStrin
 void DOMWindow::showModalDialog(const String& urlString, const String& dialogFeaturesString,
     DOMWindow* activeWindow, DOMWindow* firstWindow, PrepareDialogFunction function, void* functionContext)
 {
+
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::showModalDialog " + urlString);
+    logFPCalls(m_frame, log_str);
+#endif
+
     if (!m_frame)
         return;
     Frame* activeFrame = activeWindow->frame();
@@ -1857,6 +2010,11 @@ void DOMWindow::showModalDialog(const String& urlString, const String& dialogFea
 #if ENABLE(BLOB)
 DOMURL* DOMWindow::webkitURL() const
 {
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::webkitURL");
+    logFPCalls(m_frame, log_str);
+#endif
+
     if (!m_domURL)
         m_domURL = DOMURL::create(this->scriptExecutionContext());
     return m_domURL.get();
@@ -1866,6 +2024,10 @@ DOMURL* DOMWindow::webkitURL() const
 #if ENABLE(QUOTA)
 StorageInfo* DOMWindow::webkitStorageInfo() const
 {
+#ifdef LOG_MODS_FP
+    String log_str = String("DOMWindow::webkitStorageInfo");
+    logFPCalls(m_frame, log_str);
+#endif
     if (!m_storageInfo)
         m_storageInfo = StorageInfo::create();
     return m_storageInfo.get();
