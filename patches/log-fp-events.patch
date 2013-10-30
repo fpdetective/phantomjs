@@ -1,0 +1,1653 @@
+diff --git a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/config.h b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/config.h
+index 394bba5..21646fe 100644
+--- a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/config.h
++++ b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/config.h
+@@ -29,6 +29,8 @@
+ 
+ #include <wtf/Platform.h>
+ 
++#define LOG_MODS_FP 1 // !!! fpd to enable logging, TODO remove redundant defines
++
+ /* See note in wtf/Platform.h for more info on EXPORT_MACROS. */
+ #if USE(EXPORT_MACROS)
+ 
+diff --git a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/Assertions.h b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/Assertions.h
+index 862158b..e534ed0 100644
+--- a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/Assertions.h
++++ b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/Assertions.h
+@@ -117,6 +117,8 @@
+ #endif
+ #endif
+ 
++#define LOG_DISABLED 0 // !!! to enable logging in release version
++
+ #if COMPILER(GCC)
+ #define WTF_PRETTY_FUNCTION __PRETTY_FUNCTION__
+ #else
+diff --git a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/Platform.h b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/Platform.h
+index a7d5a2f..25dbb1f 100644
+--- a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/Platform.h
++++ b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/Platform.h
+@@ -28,6 +28,8 @@
+ #ifndef WTF_Platform_h
+ #define WTF_Platform_h
+ 
++#define LOG_MODS_FP 1
++
+ /* ==== PLATFORM handles OS, operating environment, graphics API, and
+    CPU. This macro will be phased out in favor of platform adaptation
+    macros, policy decision macros, and top-level port definitions. ==== */
+diff --git a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/AtomicString.cpp b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/AtomicString.cpp
+index 9dd655e..8bfc314 100644
+--- a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/AtomicString.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/AtomicString.cpp
+@@ -365,4 +365,10 @@ AtomicString AtomicString::fromUTF8Internal(const char* charactersStart, const c
+     return atomicString;
+ }
+ 
++#ifdef LOG_MODS_FP //!!! to enable log output
++void AtomicString::show() const //http://trac.webkit.org/browser/trunk/Source/JavaScriptCore/wtf/text/AtomicString.cpp?rev=87438
++{
++    m_string.show();
++}
++#endif
+ } // namespace WTF
+diff --git a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/AtomicString.h b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/AtomicString.h
+index cc451e8..dd110d0 100644
+--- a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/AtomicString.h
++++ b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/AtomicString.h
+@@ -123,6 +123,11 @@ public:
+     static const AtomicString& xmlnsAtom2();
+ #endif
+ 
++//#define LOG_MODS_FP 1
++#ifdef LOG_MODS_FP //!!! gunes, otherwise it's a pain to print AtomicStrings when WTFstring is not included...
++     void show() const; //http://trac.webkit.org/browser/trunk/Source/JavaScriptCore/wtf/text/AtomicString.cpp?rev=87438
++#endif
++
+ private:
+     String m_string;
+     
+diff --git a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/WTFString.cpp b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/WTFString.cpp
+index d862f96..215e8b2 100644
+--- a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/WTFString.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/WTFString.cpp
+@@ -973,12 +973,19 @@ float charactersToFloat(const UChar* data, size_t length, bool* ok, bool* didRea
+ 
+ } // namespace WTF
+ 
+-#ifndef NDEBUG
++
++//#ifndef NDEBUG - !!! gunes: we want to log from release version
++#ifdef LOG_MODS_FP
+ // For use in the debugger
+ String* string(const char*);
+ Vector<char> asciiDebug(StringImpl* impl);
+ Vector<char> asciiDebug(String& string);
+ 
++void String::show() const
++{
++    printf("%s\n", asciiDebug(impl()).data());
++}
++
+ String* string(const char* s)
+ {
+     // leaks memory!
+@@ -1009,4 +1016,5 @@ Vector<char> asciiDebug(String& string)
+     return asciiDebug(string.impl());
+ }
+ 
++
+ #endif
+diff --git a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/WTFString.h b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/WTFString.h
+index f29228b..1d2e284 100644
+--- a/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/WTFString.h
++++ b/src/qt/src/3rdparty/webkit/Source/JavaScriptCore/wtf/text/WTFString.h
+@@ -347,6 +347,10 @@ public:
+     String(WTF::HashTableDeletedValueType) : m_impl(WTF::HashTableDeletedValue) { }
+     bool isHashTableDeletedValue() const { return m_impl.isHashTableDeletedValue(); }
+ 
++#ifdef LOG_MODS_FP
++    void show() const;
++#endif
++
+ private:
+     RefPtr<StringImpl> m_impl;
+ };
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/config.h b/src/qt/src/3rdparty/webkit/Source/WebCore/config.h
+index a7ddcee..98d15da 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/config.h
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/config.h
+@@ -29,6 +29,8 @@
+ 
+ #include <wtf/Platform.h>
+ 
++#define LOG_MODS_FP 1 // !!! gunes to enable logging, TODO remove redundant defines
++
+ /* See note in wtf/Platform.h for more info on EXPORT_MACROS. */
+ #if USE(EXPORT_MACROS)
+ 
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/css/CSSFontFace.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/css/CSSFontFace.cpp
+index 2c50a04..0a97d2b 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/css/CSSFontFace.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/css/CSSFontFace.cpp
+@@ -32,6 +32,10 @@
+ #include "FontDescription.h"
+ #include "SimpleFontData.h"
+ 
++#ifdef LOG_MODS_FP
++#include "Frame.h"
++#endif
++
+ namespace WebCore {
+ 
+ CSSFontFace::~CSSFontFace()
+@@ -111,6 +115,13 @@ SimpleFontData* CSSFontFace::getFontData(const FontDescription& fontDescription,
+     for (size_t i = 0; i < size; ++i) {
+         if (SimpleFontData* result = m_sources[i]->getFontData(fontDescription, syntheticBold, syntheticItalic, fontSelector)) {
+             m_activeSource = m_sources[i];
++//#define LOG_MODS_FP 1 // !!! TODO remove redundant defines
++#ifdef LOG_MODS_FP
++// !!! TODO: famName might be data url
++            String famName = m_activeSource->string();
++            String log_str = String("CSSFontFace::getFontData ") + fontDescription.family().family() + "->" +  famName;
++            logFPCalls(0, log_str, "");
++#endif
+             return result;
+         }
+     }
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/css/CSSFontFaceSource.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/css/CSSFontFaceSource.cpp
+index b0f7365..7ff6d1c 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/css/CSSFontFaceSource.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/css/CSSFontFaceSource.cpp
+@@ -44,6 +44,10 @@
+ #include "SVGURIReference.h"
+ #endif
+ 
++#ifdef LOG_MODS_FP
++#include "Frame.h"
++#endif
++
+ namespace WebCore {
+ 
+ CSSFontFaceSource::CSSFontFaceSource(const String& str, CachedFont* font)
+@@ -103,11 +107,23 @@ SimpleFontData* CSSFontFaceSource::getFontData(const FontDescription& fontDescri
+     if (!isValid())
+         return 0;
+ 
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    String famName = m_string;
++    String log_str = String("CSSFontFaceSource::getFontData ") + famName;
++    logFPCalls(0, log_str, "");
++#endif
++
+ #if ENABLE(SVG_FONTS)
+     if (!m_font && !m_svgFontFaceElement) {
+ #else
+     if (!m_font) {
+ #endif
++
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    String famName = m_string;
++    String log_str = String("CSSFontFaceSource::getFontData ") + famName;
++    logFPCalls(0, log_str, "UNKNOWN");
++#endif
+         SimpleFontData* fontData = fontCache()->getCachedFontData(fontDescription, m_string);
+ 
+         // We're local. Just return a SimpleFontData from the normal cache.
+@@ -178,6 +194,12 @@ SimpleFontData* CSSFontFaceSource::getFontData(const FontDescription& fontDescri
+         if (CachedResourceLoader* cachedResourceLoader = fontSelector->cachedResourceLoader())
+             m_font->beginLoadIfNeeded(cachedResourceLoader);
+         // FIXME: m_string is a URL so it makes no sense to pass it as a family name.
++
++        #ifdef LOG_MODS_FP_SUPERVERBOSE
++            String famName = m_string;
++            String log_str = String("2 CSSFontFaceSource::getFontData ") + famName;
++            logFPCalls(0, log_str);
++        #endif
+         SimpleFontData* tempData = fontCache()->getCachedFontData(fontDescription, m_string);
+         if (!tempData)
+             tempData = fontCache()->getLastResortFallbackFont(fontDescription);
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/css/CSSFontSelector.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/css/CSSFontSelector.cpp
+index 8024afa..8b7c475 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/css/CSSFontSelector.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/css/CSSFontSelector.cpp
+@@ -54,6 +54,7 @@
+ #include "SVGNames.h"
+ #endif
+ 
++
+ namespace WebCore {
+ 
+ CSSFontSelector::CSSFontSelector(Document* document)
+@@ -401,8 +402,15 @@ static FontData* fontDataForGenericFamily(Document* document, const FontDescript
+     else if (familyName == "-webkit-standard")
+         genericFamily = settings->standardFontFamily();
+ 
+-    if (!genericFamily.isEmpty())
++    if (!genericFamily.isEmpty()){
++
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    String famName = genericFamily;
++    String log_str = String("CSSFontSelector::fontDataForGenericFamily ") + famName;
++    logFPCalls(0, log_str, "UNKNOWN");
++#endif
+         return fontCache()->getCachedFontData(fontDescription, genericFamily);
++    }
+ 
+     return 0;
+ }
+@@ -491,6 +499,18 @@ static inline bool compareFontFaces(CSSFontFace* first, CSSFontFace* second)
+ 
+ FontData* CSSFontSelector::getFontData(const FontDescription& fontDescription, const AtomicString& familyName)
+ {
++
++#define LOG_MODS_FP 1 // !!! TODO remove redundant defines
++#ifdef LOG_MODS_FP
++    String famName = familyName;
++    String log_str = String("CSSFontSelector::getFontData ") + famName;
++    if(m_document){
++        logFPCalls(0, log_str, m_document->url());
++    }else{
++        logFPCalls(0, log_str, "");
++    }
++#endif
++
+     if (m_fontFaces.isEmpty()) {
+         if (familyName.startsWith("-webkit-"))
+             return fontDataForGenericFamily(m_document, fontDescription, familyName);
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/dom/Document.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/dom/Document.cpp
+index 9581cbf..74ddbe6 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/dom/Document.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/dom/Document.cpp
+@@ -688,6 +688,11 @@ DOMImplementation* Document::implementation()
+ {
+     if (!m_implementation)
+         m_implementation = DOMImplementation::create(this);
++
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "Document::implementation");
++#endif
++
+     return m_implementation.get();
+ }
+ 
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/dom/Element.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/dom/Element.cpp
+index 32e47ca..8c6eac4 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/dom/Element.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/dom/Element.cpp
+@@ -380,6 +380,15 @@ int Element::offsetTop()
+ 
+ int Element::offsetWidth()
+ {
++
++#ifdef LOG_MODS_FP
++    if(document()->frame() && document()->frame()->script() && document()->frame()->script()->sourceURL()){
++        logFPCalls(document()->frame(), "Element::offsetWidth");
++    }else{
++        logFPCalls(0, "Element::offsetWidth", document()->url());
++    }
++
++#endif
+     document()->updateLayoutIgnorePendingStylesheets();
+     if (RenderBoxModelObject* rend = renderBoxModelObject())
+         return adjustForAbsoluteZoom(rend->offsetWidth(), rend);
+@@ -388,6 +397,14 @@ int Element::offsetWidth()
+ 
+ int Element::offsetHeight()
+ {
++#ifdef LOG_MODS_FP
++    if(document()->frame() && document()->frame()->script() && document()->frame()->script()->sourceURL()){
++        logFPCalls(document()->frame(), "Element::offsetWidth");
++    }else{
++        logFPCalls(0, "Element::offsetHeight", document()->url());
++    }
++#endif
++
+     document()->updateLayoutIgnorePendingStylesheets();
+     if (RenderBoxModelObject* rend = renderBoxModelObject())
+         return adjustForAbsoluteZoom(rend->offsetHeight(), rend);
+@@ -580,6 +597,10 @@ PassRefPtr<ClientRect> Element::getBoundingClientRect() const
+ {
+     document()->updateLayoutIgnorePendingStylesheets();
+ 
++#ifdef LOG_MODS_FP
++    logFPCalls(NULL, "Element::getBoundingClientRect", document()->url());
++#endif
++
+     Vector<FloatQuad> quads;
+ #if ENABLE(SVG)
+     if (isSVGElement() && renderer()) {
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/loader/icon/IconDatabase.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/loader/icon/IconDatabase.cpp
+index 39db067..b09f6b6 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/loader/icon/IconDatabase.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/loader/icon/IconDatabase.cpp
+@@ -72,7 +72,8 @@ static const int updateTimerDelay = 5;
+ 
+ static bool checkIntegrityOnOpen = false;
+ 
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+ static String urlForLogging(const String& url)
+ {
+     static unsigned urlTruncationLength = 120;
+@@ -968,7 +969,8 @@ void* IconDatabase::iconDatabaseSyncThread()
+     
+     LOG(IconDatabase, "(THREAD) IconDatabase sync thread started");
+ 
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     double startTime = currentTime();
+ #endif
+ 
+@@ -994,7 +996,8 @@ void* IconDatabase::iconDatabaseSyncThread()
+     if (shouldStopThreadActivity())
+         return syncThreadMainLoop();
+         
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     double timeStamp = currentTime();
+     LOG(IconDatabase, "(THREAD) Open took %.4f seconds", timeStamp - startTime);
+ #endif    
+@@ -1003,7 +1006,8 @@ void* IconDatabase::iconDatabaseSyncThread()
+     if (shouldStopThreadActivity())
+         return syncThreadMainLoop();
+         
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     double newStamp = currentTime();
+     LOG(IconDatabase, "(THREAD) performOpenInitialization() took %.4f seconds, now %.4f seconds from thread start", newStamp - timeStamp, newStamp - startTime);
+     timeStamp = newStamp;
+@@ -1026,7 +1030,8 @@ void* IconDatabase::iconDatabaseSyncThread()
+         if (shouldStopThreadActivity())
+             return syncThreadMainLoop();
+             
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+         newStamp = currentTime();
+         LOG(IconDatabase, "(THREAD) performImport() took %.4f seconds, now %.4f seconds from thread start", newStamp - timeStamp, newStamp - startTime);
+         timeStamp = newStamp;
+@@ -1043,7 +1048,8 @@ void* IconDatabase::iconDatabaseSyncThread()
+     if (shouldStopThreadActivity())
+         return syncThreadMainLoop();
+ 
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     newStamp = currentTime();
+     LOG(IconDatabase, "(THREAD) performURLImport() took %.4f seconds.  Entering main loop %.4f seconds from thread start", newStamp - timeStamp, newStamp - startTime);
+ #endif 
+@@ -1359,7 +1365,8 @@ void* IconDatabase::syncThreadMainLoop()
+     while (!m_threadTerminationRequested) {
+         m_syncLock.unlock();
+ 
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+         double timeStamp = currentTime();
+ #endif
+         LOG(IconDatabase, "(THREAD) Main work loop starting");
+@@ -1392,7 +1399,8 @@ void* IconDatabase::syncThreadMainLoop()
+             // has asked to delay pruning
+             static bool prunedUnretainedIcons = false;
+             if (didWrite && !m_privateBrowsingEnabled && !prunedUnretainedIcons && !databaseCleanupCounter) {
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+                 double time = currentTime();
+ #endif
+                 LOG(IconDatabase, "(THREAD) Starting pruneUnretainedIcons()");
+@@ -1411,7 +1419,8 @@ void* IconDatabase::syncThreadMainLoop()
+                 break;
+         }
+         
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+         double newstamp = currentTime();
+         LOG(IconDatabase, "(THREAD) Main work loop ran for %.4f seconds, %s requested to terminate", newstamp - timeStamp, shouldStopThreadActivity() ? "was" : "was not");
+ #endif
+@@ -1459,7 +1468,8 @@ bool IconDatabase::readFromDatabase()
+ {
+     ASSERT_ICON_SYNC_THREAD();
+     
+-#ifndef NDEBUG
++////#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     double timeStamp = currentTime();
+ #endif
+ 
+@@ -1568,7 +1578,8 @@ bool IconDatabase::writeToDatabase()
+ {
+     ASSERT_ICON_SYNC_THREAD();
+ 
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     double timeStamp = currentTime();
+ #endif
+ 
+@@ -1716,7 +1727,8 @@ void IconDatabase::checkForDanglingPageURLs(bool pruneIfFound)
+     // This check can be relatively expensive so we don't do it in a release build unless the caller has asked us to prune any dangling
+     // entries.  We also don't want to keep performing this check and reporting this error if it has already found danglers before so we
+     // keep track of whether we've found any.  We skip the check in the release build pretending to have already found danglers already.
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     static bool danglersFound = true;
+ #else
+     static bool danglersFound = false;
+@@ -1773,7 +1785,8 @@ void* IconDatabase::cleanupSyncThread()
+ {
+     ASSERT_ICON_SYNC_THREAD();
+     
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     double timeStamp = currentTime();
+ #endif 
+ 
+@@ -1793,7 +1806,8 @@ void* IconDatabase::cleanupSyncThread()
+     deleteAllPreparedStatements();    
+     m_syncDB.close();
+     
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     LOG(IconDatabase, "(THREAD) Final closure took %.4f seconds", currentTime() - timeStamp);
+ #endif
+     
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/page/DOMWindow.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/page/DOMWindow.cpp
+index a86c1af..4fce18b 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/page/DOMWindow.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/page/DOMWindow.cpp
+@@ -523,6 +523,10 @@ int DOMWindow::orientation() const
+ {
+     if (!m_frame)
+         return 0;
++
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "DOMWindow::orientation");
++#endif
+     
+     return m_frame->orientation();
+ }
+@@ -532,6 +536,11 @@ Screen* DOMWindow::screen() const
+ {
+     if (!m_screen)
+         m_screen = Screen::create(m_frame);
++
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "DOMWindow::screen");
++#endif
++
+     return m_screen.get();
+ }
+ 
+@@ -539,6 +548,11 @@ History* DOMWindow::history() const
+ {
+     if (!m_history)
+         m_history = History::create(m_frame);
++
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    logFPCalls(m_frame, "DOMWindow::history");
++#endif
++
+     return m_history.get();
+ }
+ 
+@@ -546,6 +560,11 @@ Crypto* DOMWindow::crypto() const
+ {
+     if (!m_crypto)
+         m_crypto = Crypto::create();
++
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    logFPCalls(m_frame, "DOMWindow::crypto");
++#endif
++
+     return m_crypto.get();
+ }
+ 
+@@ -553,6 +572,12 @@ BarInfo* DOMWindow::locationbar() const
+ {
+     if (!m_locationbar)
+         m_locationbar = BarInfo::create(m_frame, BarInfo::Locationbar);
++
++
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    logFPCalls(m_frame, "DOMWindow::locationbar");
++#endif
++
+     return m_locationbar.get();
+ }
+ 
+@@ -560,6 +585,10 @@ BarInfo* DOMWindow::menubar() const
+ {
+     if (!m_menubar)
+         m_menubar = BarInfo::create(m_frame, BarInfo::Menubar);
++
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    logFPCalls(m_frame, "DOMWindow::menubar");
++#endif
+     return m_menubar.get();
+ }
+ 
+@@ -567,6 +596,10 @@ BarInfo* DOMWindow::personalbar() const
+ {
+     if (!m_personalbar)
+         m_personalbar = BarInfo::create(m_frame, BarInfo::Personalbar);
++
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    logFPCalls(m_frame, "DOMWindow::personalbar");
++#endif
+     return m_personalbar.get();
+ }
+ 
+@@ -574,6 +607,10 @@ BarInfo* DOMWindow::scrollbars() const
+ {
+     if (!m_scrollbars)
+         m_scrollbars = BarInfo::create(m_frame, BarInfo::Scrollbars);
++
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    logFPCalls(m_frame, "DOMWindow::scrollbars");
++#endif
+     return m_scrollbars.get();
+ }
+ 
+@@ -581,6 +618,11 @@ BarInfo* DOMWindow::statusbar() const
+ {
+     if (!m_statusbar)
+         m_statusbar = BarInfo::create(m_frame, BarInfo::Statusbar);
++
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    logFPCalls(m_frame, "DOMWindow::statusbar");
++#endif
++
+     return m_statusbar.get();
+ }
+ 
+@@ -588,6 +630,11 @@ BarInfo* DOMWindow::toolbar() const
+ {
+     if (!m_toolbar)
+         m_toolbar = BarInfo::create(m_frame, BarInfo::Toolbar);
++
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    logFPCalls(m_frame, "DOMWindow::toolbar");
++#endif
++
+     return m_toolbar.get();
+ }
+ 
+@@ -595,6 +642,10 @@ Console* DOMWindow::console() const
+ {
+     if (!m_console)
+         m_console = Console::create(m_frame);
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    logFPCalls(m_frame, "DOMWindow::console");
++#endif
++
+     return m_console.get();
+ }
+ 
+@@ -623,6 +674,7 @@ Performance* DOMWindow::performance() const
+ }
+ #endif
+ 
++
+ Location* DOMWindow::location() const
+ {
+     if (!m_location)
+@@ -688,6 +740,9 @@ Storage* DOMWindow::localStorage(ExceptionCode& ec) const
+ #if ENABLE(NOTIFICATIONS)
+ NotificationCenter* DOMWindow::webkitNotifications() const
+ {
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "DOMWindow::webkitNotifications");
++#endif
+     if (m_notifications)
+         return m_notifications.get();
+ 
+@@ -728,6 +783,9 @@ void DOMWindow::resetGeolocation()
+ #if ENABLE(INDEXED_DATABASE)
+ IDBFactory* DOMWindow::webkitIndexedDB() const
+ {
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "DOMWindow::webkitIndexedDB");
++#endif
+     if (m_idbFactory)
+         return m_idbFactory.get();
+ 
+@@ -743,6 +801,7 @@ IDBFactory* DOMWindow::webkitIndexedDB() const
+ 
+     // FIXME: See if indexedDatabase access is allowed.
+ 
++
+     m_idbFactory = IDBFactory::create(page->group().idbFactory());
+     return m_idbFactory.get();
+ }
+@@ -751,6 +810,10 @@ IDBFactory* DOMWindow::webkitIndexedDB() const
+ #if ENABLE(FILE_SYSTEM)
+ void DOMWindow::webkitRequestFileSystem(int type, long long size, PassRefPtr<FileSystemCallback> successCallback, PassRefPtr<ErrorCallback> errorCallback)
+ {
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "DOMWindow::webkitRequestFileSystem");
++#endif
++
+     Document* document = this->document();
+     if (!document)
+         return;
+@@ -771,6 +834,9 @@ void DOMWindow::webkitRequestFileSystem(int type, long long size, PassRefPtr<Fil
+ 
+ void DOMWindow::webkitResolveLocalFileSystemURL(const String& url, PassRefPtr<EntryCallback> successCallback, PassRefPtr<ErrorCallback> errorCallback)
+ {
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "DOMWindow::webkitRequestFileSystem");
++#endif
+     Document* document = this->document();
+     if (!document)
+         return;
+@@ -971,6 +1037,10 @@ void DOMWindow::stop()
+ 
+ void DOMWindow::alert(const String& message)
+ {
++#ifdef LOG_MODS_FP
++    String log_msg = "DOMWindow::alert " + message;
++    logFPCalls(m_frame, log_msg );
++#endif
+     if (!m_frame)
+         return;
+ 
+@@ -985,6 +1055,10 @@ void DOMWindow::alert(const String& message)
+ 
+ bool DOMWindow::confirm(const String& message)
+ {
++#ifdef LOG_MODS_FP
++    String log_msg = "DOMWindow::confirm " + message;
++    logFPCalls(m_frame, log_msg);
++#endif
+     if (!m_frame)
+         return false;
+ 
+@@ -999,6 +1073,10 @@ bool DOMWindow::confirm(const String& message)
+ 
+ String DOMWindow::prompt(const String& message, const String& defaultValue)
+ {
++#ifdef LOG_MODS_FP
++    String log_str = "DOMWindow::prompt " + message;
++    logFPCalls(m_frame, log_str);
++#endif
+     if (!m_frame)
+         return String();
+ 
+@@ -1058,11 +1136,15 @@ bool DOMWindow::find(const String& string, bool caseSensitive, bool backwards, b
+ 
+ bool DOMWindow::offscreenBuffering() const
+ {
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "DOMWindow::offscreenBuffering");
++#endif
+     return true;
+ }
+ 
+ int DOMWindow::outerHeight() const
+ {
++
+     if (!m_frame)
+         return 0;
+ 
+@@ -1070,6 +1152,10 @@ int DOMWindow::outerHeight() const
+     if (!page)
+         return 0;
+ 
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::outerHeight");
++    logFPCalls(m_frame, log_str);
++#endif
+     return static_cast<int>(page->chrome()->windowRect().height());
+ }
+ 
+@@ -1082,6 +1168,11 @@ int DOMWindow::outerWidth() const
+     if (!page)
+         return 0;
+ 
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::outerWidth");
++    logFPCalls(m_frame, log_str);
++#endif
++
+     return static_cast<int>(page->chrome()->windowRect().width());
+ }
+ 
+@@ -1094,6 +1185,11 @@ int DOMWindow::innerHeight() const
+     if (!view)
+         return 0;
+     
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::innerHeight");
++    logFPCalls(m_frame, log_str);
++#endif
++
+     return static_cast<int>(view->height() / m_frame->pageZoomFactor());
+ }
+ 
+@@ -1106,6 +1202,11 @@ int DOMWindow::innerWidth() const
+     if (!view)
+         return 0;
+ 
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::innerWidth ");
++    logFPCalls(m_frame, log_str);
++#endif
++
+     return static_cast<int>(view->width() / m_frame->pageZoomFactor());
+ }
+ 
+@@ -1118,6 +1219,11 @@ int DOMWindow::screenX() const
+     if (!page)
+         return 0;
+ 
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::screenX");
++    logFPCalls(m_frame, log_str);
++#endif
++
+     return static_cast<int>(page->chrome()->windowRect().x());
+ }
+ 
+@@ -1130,6 +1236,11 @@ int DOMWindow::screenY() const
+     if (!page)
+         return 0;
+ 
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::screenY");
++    logFPCalls(m_frame, log_str);
++#endif
++
+     return static_cast<int>(page->chrome()->windowRect().y());
+ }
+ 
+@@ -1171,6 +1282,11 @@ unsigned DOMWindow::length() const
+     if (!m_frame)
+         return 0;
+ 
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::length");
++    logFPCalls(m_frame, log_str);
++#endif
++
+     return m_frame->tree()->childCount();
+ }
+ 
+@@ -1179,6 +1295,11 @@ String DOMWindow::name() const
+     if (!m_frame)
+         return String();
+ 
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    String log_str = String("DOMWindow::name " + m_frame->tree()->name());
++    logFPCalls(m_frame, log_str);
++#endif
++
+     return m_frame->tree()->name();
+ }
+ 
+@@ -1187,6 +1308,11 @@ void DOMWindow::setName(const String& string)
+     if (!m_frame)
+         return;
+ 
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    String log_str = String("DOMWindow::setName " + string);
++    logFPCalls(m_frame, log_str);
++#endif
++
+     m_frame->tree()->setName(string);
+ }
+ 
+@@ -1336,12 +1462,22 @@ double DOMWindow::devicePixelRatio() const
+     if (!page)
+         return 0.0;
+ 
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::devicePixelRatio");
++    logFPCalls(m_frame, log_str);
++#endif
++
+     return page->chrome()->scaleFactor();
+ }
+ 
+ #if ENABLE(DATABASE)
+ PassRefPtr<Database> DOMWindow::openDatabase(const String& name, const String& version, const String& displayName, unsigned long estimatedSize, PassRefPtr<DatabaseCallback> creationCallback, ExceptionCode& ec)
+ {
++
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::openDatabase " + name);
++    logFPCalls(m_frame, log_str);
++#endif
+     RefPtr<Database> database = 0;
+     if (m_frame && AbstractDatabase::isAvailable() && m_frame->document()->securityOrigin()->canAccessDatabase())
+         database = Database::openDatabase(m_frame->document(), name, version, displayName, estimatedSize, creationCallback, ec);
+@@ -1698,6 +1834,10 @@ String DOMWindow::crossDomainAccessErrorMessage(DOMWindow* activeWindow)
+     if (activeWindowURL.isNull())
+         return String();
+ 
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::crossDomainAccessErrorMessage " + m_url.string());
++    logFPCalls(m_frame, log_str);
++#endif
+     // FIXME: This error message should contain more specifics of why the same origin check has failed.
+     // Perhaps we should involve the security origin object in composing it.
+     // FIXME: This message, and other console messages, have extra newlines. Should remove them.
+@@ -1765,8 +1905,15 @@ Frame* DOMWindow::createWindow(const String& urlString, const AtomicString& fram
+ PassRefPtr<DOMWindow> DOMWindow::open(const String& urlString, const AtomicString& frameName, const String& windowFeaturesString,
+     DOMWindow* activeWindow, DOMWindow* firstWindow)
+ {
++
+     if (!m_frame)
+         return 0;
++
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::open " + urlString);
++    logFPCalls(m_frame, log_str);
++#endif
++
+     Frame* activeFrame = activeWindow->frame();
+     if (!activeFrame)
+         return 0;
+@@ -1831,6 +1978,12 @@ PassRefPtr<DOMWindow> DOMWindow::open(const String& urlString, const AtomicStrin
+ void DOMWindow::showModalDialog(const String& urlString, const String& dialogFeaturesString,
+     DOMWindow* activeWindow, DOMWindow* firstWindow, PrepareDialogFunction function, void* functionContext)
+ {
++
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::showModalDialog " + urlString);
++    logFPCalls(m_frame, log_str);
++#endif
++
+     if (!m_frame)
+         return;
+     Frame* activeFrame = activeWindow->frame();
+@@ -1857,6 +2010,11 @@ void DOMWindow::showModalDialog(const String& urlString, const String& dialogFea
+ #if ENABLE(BLOB)
+ DOMURL* DOMWindow::webkitURL() const
+ {
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::webkitURL");
++    logFPCalls(m_frame, log_str);
++#endif
++
+     if (!m_domURL)
+         m_domURL = DOMURL::create(this->scriptExecutionContext());
+     return m_domURL.get();
+@@ -1866,6 +2024,10 @@ DOMURL* DOMWindow::webkitURL() const
+ #if ENABLE(QUOTA)
+ StorageInfo* DOMWindow::webkitStorageInfo() const
+ {
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMWindow::webkitStorageInfo");
++    logFPCalls(m_frame, log_str);
++#endif
+     if (!m_storageInfo)
+         m_storageInfo = StorageInfo::create();
+     return m_storageInfo.get();
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/page/Frame.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/page/Frame.cpp
+index 835be73..37efbfa 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/page/Frame.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/page/Frame.cpp
+@@ -115,6 +115,28 @@ using namespace std;
+ 
+ namespace WebCore {
+ 
++#ifdef LOG_MODS_FP
++void logFPCalls(Frame* p_frame, String log_str, String url){
++	if (!url && p_frame)
++		url = getUrls(p_frame);
++	printf(">>>FPLOG %s %s\n", log_str.utf8().data(), url.utf8().data());
++}
++
++String getUrls(Frame* p_frame){
++	if (!p_frame || !p_frame->page() || !p_frame->document())
++		return String();
++
++	String doc_url = p_frame->document()->url();
++	const String* js_url = p_frame->script()->sourceURL();
++	String url;
++	if(!js_url)
++		url = doc_url;
++	else
++		url = " onURL: " + doc_url + " onJSURL: " + *js_url;
++	return url;
++}
++#endif
++
+ using namespace HTMLNames;
+ 
+ #ifndef NDEBUG
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/page/Frame.h b/src/qt/src/3rdparty/webkit/Source/WebCore/page/Frame.h
+index 96ba9e6..ba3ed22 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/page/Frame.h
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/page/Frame.h
+@@ -61,6 +61,11 @@ typedef struct HBITMAP__* HBITMAP;
+ 
+ namespace WebCore {
+ 
++#ifdef LOG_MODS_FP
++	String getUrls(Frame* p_frame);
++	void logFPCalls(Frame* p_frame, String log_str, String url="");
++#endif
++
+     class Document;
+     class FrameView;
+     class HTMLTableCellElement;
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/page/Navigator.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/page/Navigator.cpp
+index c9e8408..f7d4dc3 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/page/Navigator.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/page/Navigator.cpp
+@@ -109,6 +109,11 @@ String Navigator::appVersion() const
+ 
+ String Navigator::language() const
+ {
++#ifdef LOG_MODS_FP
++    String log_str = String("Navigator::language ") + String(defaultLanguage().utf8().data());
++    logFPCalls(m_frame, log_str);
++#endif
++
+     return defaultLanguage();
+ }
+ 
+@@ -122,11 +127,27 @@ String Navigator::userAgent() const
+     if (!m_frame->page())
+         return String();
+         
++#ifdef LOG_MODS_FP
++    String log_str = String("Navigator::userAgent ") + m_frame->loader()->userAgent(m_frame->document()->url());
++    logFPCalls(m_frame, log_str);
++#endif/*
++    #ifdef LOG_MODS_FP
++
++    String userAgent = m_frame->loader()->userAgent(m_frame->document()->url());
++    String url = getUrls(m_frame);
++    printf(">>>Call Navigator::userAgent: %s onURL: %s\n", userAgent.utf8().data(), url.utf8().data());
++#endif*/
++
+     return m_frame->loader()->userAgent(m_frame->document()->url());
+ }
+ 
+ DOMPluginArray* Navigator::plugins() const
+ {
++#ifdef LOG_MODS_FP
++    String log_str = "Navigator::plugins ---";
++    logFPCalls(m_frame, log_str);
++#endif
++
+     if (!m_plugins)
+         m_plugins = DOMPluginArray::create(m_frame);
+     return m_plugins.get();
+@@ -134,6 +155,9 @@ DOMPluginArray* Navigator::plugins() const
+ 
+ DOMMimeTypeArray* Navigator::mimeTypes() const
+ {
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "Navigator::mimeTypes ---");
++#endif
+     if (!m_mimeTypes)
+         m_mimeTypes = DOMMimeTypeArray::create(m_frame);
+     return m_mimeTypes.get();
+@@ -144,8 +168,18 @@ bool Navigator::cookieEnabled() const
+     if (!m_frame)
+         return false;
+         
+-    if (m_frame->page() && !m_frame->page()->cookieEnabled())
++    if (m_frame->page() && !m_frame->page()->cookieEnabled()){
++
++        #ifdef LOG_MODS_FP
++            logFPCalls(m_frame, "Navigator::cookieEnabled False");
++        #endif
++
+         return false;
++    }
++
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "Navigator::cookieEnabled");
++#endif
+ 
+     return cookiesEnabled(m_frame->document());
+ }
+@@ -154,6 +188,9 @@ bool Navigator::javaEnabled() const
+ {
+     if (!m_frame || !m_frame->settings())
+         return false;
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "Navigator::javaEnabled");
++#endif
+ 
+     return m_frame->settings()->isJavaEnabled();
+ }
+@@ -162,6 +199,11 @@ Geolocation* Navigator::geolocation() const
+ {
+     if (!m_geolocation)
+         m_geolocation = Geolocation::create(m_frame);
++
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "Navigator::geolocation");
++#endif
++
+     return m_geolocation.get();
+ }
+ 
+@@ -175,6 +217,10 @@ void Navigator::getStorageUpdates()
+     if (!page)
+         return;
+ 
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "Navigator::getStorageUpdates");
++#endif
++
+     StorageNamespace* localStorage = page->group().localStorage();
+     if (localStorage)
+         localStorage->unlock();
+@@ -186,6 +232,7 @@ static bool verifyCustomHandlerURL(const String& baseURL, const String& url, Exc
+ {
+     // The specification requires that it is a SYNTAX_ERR if the "%s" token is
+     // not present.
++
+     static const char token[] = "%s";
+     int index = url.find(token);
+     if (-1 == index) {
+@@ -221,6 +268,12 @@ static bool verifyProtocolHandlerScheme(const String& scheme, ExceptionCode& ec)
+ 
+ void Navigator::registerProtocolHandler(const String& scheme, const String& url, const String& title, ExceptionCode& ec)
+ {
++
++#ifdef LOG_MODS_FP
++    String log_str = "Navigator::registerProtocolHandler scheme: " + scheme + "url: " + url + "title" + title;
++    logFPCalls(m_frame, log_str);
++#endif
++
+     if (!verifyProtocolHandlerScheme(scheme, ec))
+         return;
+ 
+@@ -250,6 +303,10 @@ void Navigator::webkitGetUserMedia(const String& options,
+                                    PassRefPtr<NavigatorUserMediaErrorCallback> errorCallback)
+ {
+     // FIXME: implement a call to the media stream context when available.
++#ifdef LOG_MODS_FP
++    String log_str = "Navigator::webkitGetUserMedia options: " + options;
++    logFPCalls(m_frame, log_str);
++#endif
+ }
+ #endif
+ 
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/page/NavigatorBase.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/page/NavigatorBase.cpp
+index ca51a29..0344240 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/page/NavigatorBase.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/page/NavigatorBase.cpp
+@@ -65,6 +65,10 @@
+ #endif // ifndef WEBCORE_NAVIGATOR_VENDOR_SUB
+ 
+ 
++#ifdef LOG_MODS_FP
++#include <stdio.h> //!!! gunes: to enable printf. We cannot access frame.cpp from here
++#endif
++
+ namespace WebCore {
+ 
+ NavigatorBase::~NavigatorBase()
+@@ -73,6 +77,9 @@ NavigatorBase::~NavigatorBase()
+ 
+ String NavigatorBase::appName() const
+ {
++#ifdef LOG_MODS_FP
++    printf(">>>FPLOG NavigatorBase::appName Netscape\n");
++#endif
+     return "Netscape";
+ }
+ 
+@@ -80,11 +87,22 @@ String NavigatorBase::appVersion() const
+ {
+     // Version is everything in the user agent string past the "Mozilla/" prefix.
+     const String& agent = userAgent();
++
++#ifdef LOG_MODS_FP
++    //const String& log_str = String("NavigatorBase::appVersion ") + agent.substring(agent.find('/') + 1);
++    printf(">>>FPLOG NavigatorBase::appVersion\n");
++#endif
++
+     return agent.substring(agent.find('/') + 1);
+ }
+ 
+ String NavigatorBase::platform() const
+ {
++
++#ifdef LOG_MODS_FP
++    printf(">>>FPLOG NavigatorBase::platform %s\n", WEBCORE_NAVIGATOR_PLATFORM);
++#endif
++
+ #if OS(LINUX)
+     if (String("") != WEBCORE_NAVIGATOR_PLATFORM)
+         return WEBCORE_NAVIGATOR_PLATFORM;
+@@ -98,31 +116,53 @@ String NavigatorBase::platform() const
+ 
+ String NavigatorBase::appCodeName() const
+ {
++#ifdef LOG_MODS_FP
++    printf(">>>FPLOG NavigatorBase::appCodeName Mozilla\n");
++#endif
+     return "Mozilla";
+ }
+ 
+ String NavigatorBase::product() const
+ {
++#ifdef LOG_MODS_FP
++    printf(">>>FPLOG NavigatorBase::product %s\n", WEBCORE_NAVIGATOR_PRODUCT);
++#endif
++
+     return WEBCORE_NAVIGATOR_PRODUCT;
+ }
+ 
+ String NavigatorBase::productSub() const
+ {
++#ifdef LOG_MODS_FP
++    printf(">>>FPLOG NavigatorBase::productSub %s\n", WEBCORE_NAVIGATOR_PRODUCT_SUB);
++#endif
++
+     return WEBCORE_NAVIGATOR_PRODUCT_SUB;
+ }
+ 
+ String NavigatorBase::vendor() const
+ {
++#ifdef LOG_MODS_FP
++    printf(">>>FPLOG NavigatorBase::vendor %s\n", WEBCORE_NAVIGATOR_VENDOR);
++#endif
++
+     return WEBCORE_NAVIGATOR_VENDOR;
+ }
+ 
+ String NavigatorBase::vendorSub() const
+ {
++#ifdef LOG_MODS_FP
++    printf(">>>FPLOG NavigatorBase::vendorSub %s\n", WEBCORE_NAVIGATOR_VENDOR_SUB);
++#endif
++
+     return WEBCORE_NAVIGATOR_VENDOR_SUB;
+ }
+ 
+ bool NavigatorBase::onLine() const
+ {
++#ifdef LOG_MODS_FP
++    printf(">>>FPLOG NavigatorBase::onLine\n");
++#endif
+     return networkStateNotifier().onLine();
+ }
+ 
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/page/Screen.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/page/Screen.cpp
+index bddc030..a17025c 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/page/Screen.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/page/Screen.cpp
+@@ -57,6 +57,9 @@ unsigned Screen::height() const
+ {
+     if (!m_frame)
+         return 0;
++#ifdef LOG_MODS_FP
++	logFPCalls(m_frame, "Screen::height");
++#endif
+     return static_cast<unsigned>(screenRect(m_frame->view()).height());
+ }
+ 
+@@ -64,6 +67,10 @@ unsigned Screen::width() const
+ {
+     if (!m_frame)
+         return 0;
++#ifdef LOG_MODS_FP
++	logFPCalls(m_frame, "Screen::width");
++#endif
++
+     return static_cast<unsigned>(screenRect(m_frame->view()).width());
+ }
+ 
+@@ -71,6 +78,9 @@ unsigned Screen::colorDepth() const
+ {
+     if (!m_frame)
+         return 0;
++#ifdef LOG_MODS_FP
++	logFPCalls(m_frame, "Screen::colorDepth");
++#endif
+     return static_cast<unsigned>(screenDepth(m_frame->view()));
+ }
+ 
+@@ -78,6 +88,11 @@ unsigned Screen::pixelDepth() const
+ {
+     if (!m_frame)
+         return 0;
++
++#ifdef LOG_MODS_FP
++	logFPCalls(m_frame, "Screen::pixelDepth");
++#endif
++
+     return static_cast<unsigned>(screenDepth(m_frame->view()));
+ }
+ 
+@@ -85,6 +100,11 @@ int Screen::availLeft() const
+ {
+     if (!m_frame)
+         return 0;
++
++#ifdef LOG_MODS_FP
++	logFPCalls(m_frame, "Screen::availLeft");
++#endif
++
+     return static_cast<int>(screenAvailableRect(m_frame->view()).x());
+ }
+ 
+@@ -92,6 +112,11 @@ int Screen::availTop() const
+ {
+     if (!m_frame)
+         return 0;
++
++#ifdef LOG_MODS_FP
++	logFPCalls(m_frame, "Screen::availTop");
++#endif
++
+     return static_cast<int>(screenAvailableRect(m_frame->view()).y());
+ }
+ 
+@@ -99,6 +124,11 @@ unsigned Screen::availHeight() const
+ {
+     if (!m_frame)
+         return 0;
++
++#ifdef LOG_MODS_FP
++	logFPCalls(m_frame, "Screen::availHeight");
++#endif
++
+     return static_cast<unsigned>(screenAvailableRect(m_frame->view()).height());
+ }
+ 
+@@ -106,6 +136,11 @@ unsigned Screen::availWidth() const
+ {
+     if (!m_frame)
+         return 0;
++
++#ifdef LOG_MODS_FP
++	logFPCalls(m_frame, "Screen::availWidth");
++#endif
++
+     return static_cast<unsigned>(screenAvailableRect(m_frame->view()).width());
+ }
+ 
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/platform/graphics/FontCache.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/platform/graphics/FontCache.cpp
+index d64878b..eb653f5 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/platform/graphics/FontCache.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/platform/graphics/FontCache.cpp
+@@ -41,6 +41,16 @@
+ 
+ using namespace WTF;
+ 
++
++#ifdef LOG_MODS_FP
++#include <stdio.h> //!!! gunes: to enable printf
++#include <wtf/text/WTFString.h>
++#endif
++
++#ifdef LOG_MODS_FP
++#include "Frame.h"
++#endif
++
+ namespace WebCore {
+ 
+ FontCache* fontCache()
+@@ -255,6 +265,13 @@ static ListHashSet<const SimpleFontData*>* gInactiveFontData = 0;
+ 
+ SimpleFontData* FontCache::getCachedFontData(const FontDescription& fontDescription, const AtomicString& family, bool checkingAlternateName)
+ {
++
++#ifdef LOG_MODS_FP_SUPERVERBOSE
++    String famName = family;
++    String log_str = String("FontCache::getCachedFontData ") + famName;
++    logFPCalls(0, log_str, "");
++#endif
++
+     FontPlatformData* platformData = getCachedFontPlatformData(fontDescription, family, checkingAlternateName);
+     if (!platformData)
+         return 0;
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMMimeType.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMMimeType.cpp
+index 114d218..af05080 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMMimeType.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMMimeType.cpp
+@@ -46,6 +46,10 @@ DOMMimeType::~DOMMimeType()
+ 
+ const String &DOMMimeType::type() const
+ {
++#ifdef LOG_MODS_FP
++	logFPCalls(m_frame, String("DOMMimeType::type"));
++#endif
++
+     return mimeClassInfo().type;
+ }
+ 
+@@ -59,11 +63,19 @@ String DOMMimeType::suffixes() const
+             builder.append(',');
+         builder.append(extensions[i]);
+     }
++
++#ifdef LOG_MODS_FP
++	logFPCalls(m_frame, String("DOMMimeType::suffixes"));
++#endif
+     return builder.toString();
+ }
+ 
+ const String &DOMMimeType::description() const
+ {
++#ifdef LOG_MODS_FP
++	logFPCalls(m_frame, String("DOMMimeType::description"));
++#endif
++
+     return mimeClassInfo().desc;
+ }
+ 
+@@ -72,6 +84,10 @@ PassRefPtr<DOMPlugin> DOMMimeType::enabledPlugin() const
+     if (!m_frame || !m_frame->page() || !m_frame->page()->mainFrame()->loader()->subframeLoader()->allowPlugins(NotAboutToInstantiatePlugin))
+         return 0;
+ 
++#ifdef LOG_MODS_FP
++	logFPCalls(m_frame, String("DOMMimeType::enabledPlugin"));
++#endif
++
+     return DOMPlugin::create(m_pluginData.get(), m_frame, m_pluginData->mimePluginIndices()[m_index]);
+ }
+ 
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMMimeTypeArray.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMMimeTypeArray.cpp
+index 82d4006..dda74a4 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMMimeTypeArray.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMMimeTypeArray.cpp
+@@ -39,14 +39,27 @@ DOMMimeTypeArray::~DOMMimeTypeArray()
+ 
+ unsigned DOMMimeTypeArray::length() const
+ {
++
+     PluginData* data = getPluginData();
+-    if (!data)
++    if (!data){
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, "DOMMimeTypeArray::length 0");
++#endif
+         return 0;
++    }
++#ifdef LOG_MODS_FP
++    logFPCalls(m_frame, String("DOMMimeTypeArray::length %d", data->mimes().size()));
++#endif
++
+     return data->mimes().size();
+ }
+ 
+ PassRefPtr<DOMMimeType> DOMMimeTypeArray::item(unsigned index)
+ {
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMMimeTypeArray::item[%d]", index);
++    logFPCalls(m_frame, log_str);
++#endif
+     PluginData* data = getPluginData();
+     if (!data)
+         return 0;
+@@ -71,6 +84,11 @@ bool DOMMimeTypeArray::canGetItemsForName(const AtomicString& propertyName)
+ 
+ PassRefPtr<DOMMimeType> DOMMimeTypeArray::namedItem(const AtomicString& propertyName)
+ {
++#ifdef LOG_MODS_FP
++    String propName = propertyName;
++    String log_str = String("DOMMimeTypeArray::namedItem: ") + propName;
++    logFPCalls(m_frame, log_str);
++#endif
+     PluginData *data = getPluginData();
+     if (!data)
+         return 0;
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMPlugin.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMPlugin.cpp
+index 8ddb507..87892b4 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMPlugin.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMPlugin.cpp
+@@ -42,26 +42,46 @@ DOMPlugin::~DOMPlugin()
+ 
+ String DOMPlugin::name() const
+ {
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMPlugin::name") + pluginInfo().name;
++    logFPCalls(m_frame, log_str);
++#endif
+     return pluginInfo().name;
+ }
+ 
+ String DOMPlugin::filename() const
+ {
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMPlugin::filename") + pluginInfo().file;
++    logFPCalls(m_frame, log_str);
++#endif
+     return pluginInfo().file;
+ }
+ 
+ String DOMPlugin::description() const
+ {
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMPlugin::description") + pluginInfo().desc;
++    logFPCalls(m_frame, log_str);
++#endif
+     return pluginInfo().desc;
+ }
+ 
+ unsigned DOMPlugin::length() const
+ {
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMPlugin::length") + String("%d", pluginInfo().mimes.size());
++    logFPCalls(m_frame, log_str);
++#endif
+     return pluginInfo().mimes.size();
+ }
+ 
+ PassRefPtr<DOMMimeType> DOMPlugin::item(unsigned index)
+ {
++#ifdef LOG_MODS_FP
++    String log_str = String("DOMPlugin::item w/ index: ") + String("%d", index);
++    logFPCalls(m_frame, log_str);
++#endif
+     if (index >= pluginInfo().mimes.size())
+         return 0;
+ 
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMPluginArray.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMPluginArray.cpp
+index 766c3eb..a5278d9 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMPluginArray.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/plugins/DOMPluginArray.cpp
+@@ -40,14 +40,23 @@ DOMPluginArray::~DOMPluginArray()
+ unsigned DOMPluginArray::length() const
+ {
+     PluginData* data = pluginData();
+-    if (!data)
+-        return 0;
++    if (!data){
++#ifdef LOG_MODS_FP
++	logFPCalls(m_frame, "DOMPluginArray::length 0");
++#endif
++        return 1;
++    }
++
+     return data->plugins().size();
+ }
+ 
+ PassRefPtr<DOMPlugin> DOMPluginArray::item(unsigned index)
+ {
+-    PluginData* data = pluginData();
++#ifdef LOG_MODS_FP
++	String log_str = String("DOMPluginArray::item[%d]", index);
++	logFPCalls(m_frame, log_str);
++#endif
++	PluginData* data = pluginData();
+     if (!data)
+         return 0;
+     const Vector<PluginInfo>& plugins = data->plugins();
+@@ -71,7 +80,13 @@ bool DOMPluginArray::canGetItemsForName(const AtomicString& propertyName)
+ 
+ PassRefPtr<DOMPlugin> DOMPluginArray::namedItem(const AtomicString& propertyName)
+ {
+-    PluginData* data = pluginData();
++
++#ifdef LOG_MODS_FP
++	String propName = propertyName.string();
++	String log_str = String("DOMPluginArray::namedItem: ") + propName;
++	logFPCalls(m_frame, log_str);
++#endif
++	PluginData* data = pluginData();
+     if (!data)
+         return 0;
+     const Vector<PluginInfo>& plugins = data->plugins();
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/storage/AbstractDatabase.h b/src/qt/src/3rdparty/webkit/Source/WebCore/storage/AbstractDatabase.h
+index 9279adc..65f027a 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/storage/AbstractDatabase.h
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/storage/AbstractDatabase.h
+@@ -36,7 +36,8 @@
+ #include "SQLiteDatabase.h"
+ #include <wtf/Forward.h>
+ #include <wtf/ThreadSafeRefCounted.h>
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED // !!! gunes: to fix build error https://bugs.webkit.org/attachment.cgi?id=98528&action=diff http://mac-os-forge.2317878.n4.nabble.com/Inconsistency-in-logging-approach-td167026.html
+ #include "SecurityOrigin.h"
+ #endif
+ 
+@@ -109,7 +110,8 @@ protected:
+     unsigned long m_estimatedSize;
+     String m_filename;
+ 
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED // !!! see other note above
+     String databaseDebugName() const { return m_contextThreadSecurityOrigin->toString() + "::" + m_name; }
+ #endif
+ 
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/storage/DatabaseTask.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/storage/DatabaseTask.cpp
+index 343ae1e..51d33e2 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/storage/DatabaseTask.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/storage/DatabaseTask.cpp
+@@ -108,7 +108,8 @@ void Database::DatabaseOpenTask::doPerformTask()
+     m_success = database()->performOpenAndVerify(m_setVersionInNewDatabase, m_code);
+ }
+ 
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+ const char* Database::DatabaseOpenTask::debugTaskName() const
+ {
+     return "DatabaseOpenTask";
+@@ -128,7 +129,8 @@ void Database::DatabaseCloseTask::doPerformTask()
+     database()->close();
+ }
+ 
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+ const char* Database::DatabaseCloseTask::debugTaskName() const
+ {
+     return "DatabaseCloseTask";
+@@ -150,7 +152,8 @@ void Database::DatabaseTransactionTask::doPerformTask()
+         m_transaction->database()->inProgressTransactionCompleted();
+ }
+ 
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+ const char* Database::DatabaseTransactionTask::debugTaskName() const
+ {
+     return "DatabaseTransactionTask";
+@@ -172,7 +175,8 @@ void Database::DatabaseTableNamesTask::doPerformTask()
+     m_tableNames = database()->performGetTableNames();
+ }
+ 
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+ const char* Database::DatabaseTableNamesTask::debugTaskName() const
+ {
+     return "DatabaseTableNamesTask";
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/storage/DatabaseTask.h b/src/qt/src/3rdparty/webkit/Source/WebCore/storage/DatabaseTask.h
+index e1df591..efe7134 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/storage/DatabaseTask.h
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/storage/DatabaseTask.h
+@@ -90,7 +90,8 @@ private:
+     Database* m_database;
+     DatabaseTaskSynchronizer* m_synchronizer;
+ 
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     virtual const char* debugTaskName() const = 0;
+     bool m_complete;
+ #endif
+@@ -107,7 +108,8 @@ private:
+     DatabaseOpenTask(Database*, bool setVersionInNewDatabase, DatabaseTaskSynchronizer*, ExceptionCode&, bool& success);
+ 
+     virtual void doPerformTask();
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     virtual const char* debugTaskName() const;
+ #endif
+ 
+@@ -127,7 +129,8 @@ private:
+     DatabaseCloseTask(Database*, DatabaseTaskSynchronizer*);
+ 
+     virtual void doPerformTask();
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     virtual const char* debugTaskName() const;
+ #endif
+ };
+@@ -146,7 +149,8 @@ private:
+     DatabaseTransactionTask(PassRefPtr<SQLTransaction>);
+ 
+     virtual void doPerformTask();
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     virtual const char* debugTaskName() const;
+ #endif
+ 
+@@ -164,7 +168,8 @@ private:
+     DatabaseTableNamesTask(Database*, DatabaseTaskSynchronizer*, Vector<String>& names);
+ 
+     virtual void doPerformTask();
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     virtual const char* debugTaskName() const;
+ #endif
+ 
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/storage/SQLTransaction.cpp b/src/qt/src/3rdparty/webkit/Source/WebCore/storage/SQLTransaction.cpp
+index dfcd568..582155a 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/storage/SQLTransaction.cpp
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/storage/SQLTransaction.cpp
+@@ -117,7 +117,8 @@ void SQLTransaction::enqueueStatement(PassRefPtr<SQLStatement> statement)
+     m_statementQueue.append(statement);
+ }
+ 
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+ const char* SQLTransaction::debugStepName(SQLTransaction::TransactionStepMethod step)
+ {
+     if (step == &SQLTransaction::acquireLock)
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/storage/SQLTransaction.h b/src/qt/src/3rdparty/webkit/Source/WebCore/storage/SQLTransaction.h
+index 4c84f91..4a7c81f 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/storage/SQLTransaction.h
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/storage/SQLTransaction.h
+@@ -105,7 +105,8 @@ private:
+     void deliverTransactionErrorCallback();
+     void cleanupAfterTransactionErrorCallback();
+ 
+-#ifndef NDEBUG
++//#ifndef NDEBUG
++#if !LOG_DISABLED //!!! gunes: to fix build problem - https://bugs.webkit.org/attachment.cgi?id=98528&action=diff
+     static const char* debugStepName(TransactionStepMethod);
+ #endif
+ 
