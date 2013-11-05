@@ -115,9 +115,7 @@ SimpleFontData* CSSFontFace::getFontData(const FontDescription& fontDescription,
     for (size_t i = 0; i < size; ++i) {
         if (SimpleFontData* result = m_sources[i]->getFontData(fontDescription, syntheticBold, syntheticItalic, fontSelector)) {
             m_activeSource = m_sources[i];
-//#define LOG_MODS_FP 1 // !!! TODO remove redundant defines
 #ifdef LOG_MODS_FP
-// !!! TODO: famName might be data url
             String famName = m_activeSource->string();
             String log_str = String("CSSFontFace::getFontData ") + fontDescription.family().family() + "->" +  famName;
             logFPCalls(0, log_str, "");
